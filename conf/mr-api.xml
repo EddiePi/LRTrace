@@ -1,0 +1,63 @@
+<rules>
+    <!-- common -->
+    <rule>
+        <regex>.*Down to the last merge-pass.*size: (?&lt;byte&gt;[0-9]+)</regex>
+        <dateOffset>-7200000</dateOffset>
+        <group>
+            <name>merge</name>
+            <type>state</type>
+            <isFinish>false</isFinish>
+            <value>byte</value>
+        </group>
+    </rule>
+
+    <!-- map -->
+    <rule>
+        <regex>.*kvstart = [0-9]+.*length = (?&lt;kbyte&gt;[0-9]+)/(?&lt;vbyte&gt;[0-9]+)</regex>
+        <dateOffset>-7200000</dateOffset>
+        <group>
+            <name>spill.key</name>
+            <type>state</type>
+            <isFinish>false</isFinish>
+            <value>kbyte</value>
+        </group>
+        <group>
+            <name>spill.value</name>
+            <type>state</type>
+            <isFinish>false</isFinish>
+            <value>vbyte</value>
+        </group>
+    </rule>
+    <!-- reduce -->
+    <rule>
+        <regex>.*(?&lt;fetcherId&gt;fetcher#[0-9]+) about to.*len: (?&lt;byte&gt;[0-9]+) to.*</regex>
+        <dateOffset>-7200000</dateOffset>
+        <group>
+            <!-- required -->
+            <name>fetcher</name>
+            <type>state</type>
+            <tag>fetcherId</tag>
+            <!-- optional, default: false -->
+            <isFinish>false</isFinish>
+            <value>byte</value>
+        </group>
+        <!--group>
+            <name>fetched.byte</name>
+            <type>state</type>
+            <tag>fetcherId</tag>
+            <isFinish>false</isFinish>
+            <value>byte</value>
+        </group-->
+    </rule>
+    <rule>
+        <regex>.*freed by (?&lt;fetcherId&gt;fetcher#[0-9]+) in.*</regex>
+        <dateOffset>-7200000</dateOffset>
+        <group>
+            <name>fetcher</name>
+            <type>event</type>
+            <tag>fetcherId</tag>
+            <isFinish>true</isFinish>
+            <value>1.0</value>
+        </group>
+    </rule>
+</rules>

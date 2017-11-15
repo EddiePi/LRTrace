@@ -1,0 +1,63 @@
+<rules>
+    <rule>
+        <regex>.*Container (?&lt;container&gt;container_[0-9]+_[0-9]+_[0-9]+_[0-9]+).*transitioned.*to (?&lt;state&gt;.*)</regex>
+        <dateOffset>0</dateOffset>
+        <group>
+            <!-- required -->
+            <name>state</name>
+            <type>state</type>
+            <tag>container</tag>
+            <tag>state</tag>
+            <!-- optional, default: false -->
+            <isFinish>false</isFinish>
+            <value>1</value>
+        </group>
+    </rule>
+    <rule>
+        <regex>.*Start request for (?&lt;container&gt;container_[0-9]+_[0-9]+_[0-9]+_[0-9]+).*</regex>
+        <dateOffset>0</dateOffset>
+        <group>
+            <name>state</name>
+            <type>state</type>
+            <tag>container</tag>
+            <isFinish>false</isFinish>
+            <value>1</value>
+        </group>
+    </rule>
+    <!--rule>
+        <regex>.*(?&lt;app&gt;application_[0-9]+_[0-9]+) State change from.*to (?&lt;state&gt;.*)</regex>
+        <dateOffset>0</dateOffset>
+        <group>
+            <name>app.state</name>
+            <type>state</type>
+            <tag>app</tag>
+            <tag>state</tag>
+            <isFinish>false</isFinish>
+            <value>1</value>
+        </group>
+    </rule-->
+    <rule>
+        <regex>.*(?&lt;appAttempt&gt;appattempt_[0-9]+_[0-9]+_[0-9]+).*State change from.*to (?&lt;state&gt;.*)</regex>
+        <dateOffset>0</dateOffset>
+        <group>
+            <name>app.attempt.state</name>
+            <type>state</type>
+            <tag>appAttempt</tag>
+            <tag>state</tag>
+            <isFinish>false</isFinish>
+            <value>1</value>
+        </group>
+    </rule>
+    <rule>
+        <regex>.*(?&lt;container&gt;container_[0-9]+_[0-9]+_[0-9]+_[0-9]+) Container Transitioned.*to (?&lt;state&gt;.*)</regex>
+        <dateOffset>0</dateOffset>
+        <group>
+            <name>rm.container.state</name>
+            <type>state</type>
+            <tag>container</tag>
+            <tag>state</tag>
+            <isFinish>false</isFinish>
+            <value>1</value>
+        </group>
+    </rule>
+</rules>

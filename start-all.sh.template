@@ -1,0 +1,10 @@
+#!/bin/bash
+export TRACINGSERVER_HOME=/home/eddie/tracing-server-2.0
+
+$TRACINGSERVER_HOME/run.sh
+while read LINE
+do
+	ssh $LINE "$TRACINGSERVER_HOME/run.sh 2>&1" &
+done < slaves
+wait
+exit 0

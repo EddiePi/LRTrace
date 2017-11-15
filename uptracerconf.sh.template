@@ -1,0 +1,8 @@
+#!/bin/bash
+export TRACINGSERVER_HOME=/home/eddie/tracing-server-2.0
+
+while read LINE
+do
+	scp  ./conf/tracer.conf eddie@$LINE:$TRACINGSERVER_HOME/conf/
+done < slaves
+

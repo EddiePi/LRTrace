@@ -1,0 +1,7 @@
+<rules>
+    <rule>
+        <name>stage</name>
+        <isFinish>false</isFinish>
+        <regex>.*Finished task.*in (stage\s[0-9]*\.[0-9]*) \(TID.*</regex>
+    </rule>
+</rules>

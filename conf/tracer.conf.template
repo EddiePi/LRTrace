@@ -1,0 +1,23 @@
+tracer.docker.monitor-interval      20
+tracer.docker.monitor.ms-resolution     false
+
+tracer.kafka.bootstrap.servers   localhost:9092
+
+tracer.log.app.root             /home/eddie/hadoop-2.7.3/logs/userlogs
+tracer.log.nodemanager.root     /home/eddie/hadoop-2.7.3/logs
+tracer.log.spark-api.path       ../conf/spark.api
+tracer.log.mr-api.path          ../conf/mr.api
+tracer.log.custom-api.enabled   false
+tracer.log.custom-api.path      ./custom.api
+
+tracer.log.testmode.enabled     false
+tracer.log.testmode.dir         /home/eddie/testdir/test.log
+
+tracer.channels                 tsdb, window
+
+tracer.tsdb.server              localhost:4242
+
+tracer.system-monitor.enabled   true
+
+tracer.detection.mode           storage
+tracer.detection.data-path      /home/eddie/hookup/data

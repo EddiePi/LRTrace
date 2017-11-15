@@ -1,0 +1,9 @@
+#!/bin/bash
+export TRACINGSERVER_HOME=/home/eddie/tracing-server-2.0
+$TRACINGSERVER_HOME/stop.sh
+while read LINE
+do
+	ssh $LINE "$TRACINGSERVER_HOME/stop.sh" &
+done < slaves
+wait
+exit 0
