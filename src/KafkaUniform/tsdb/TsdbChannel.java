@@ -16,6 +16,9 @@ public class TsdbChannel implements KafkaChannel {
     String databaseURI;
     TracerConf conf;
 
+    TransferRunnable transferRunnable;
+    Thread transferThread;
+
     public TsdbChannel() {
         databaseURI = conf.getStringOrDefault("tracer.tsdb.server", "localhost:4242");
         if (!databaseURI.matches("http://.*")) {
@@ -24,9 +27,13 @@ public class TsdbChannel implements KafkaChannel {
         if (!databaseURI.matches(".*/api/put")) {
             databaseURI = databaseURI + "/api/put";
         }
+
+        transferRunnable = new TransferRunnable();
+        transferThread = new Thread(transferRunnable);
+        transferThread.start();
     }
 
-    private class TransferRunnalbe implements Runnable {
+    private class TransferRunnable implements Runnable {
         boolean isRunning = true;
 
         @Override
@@ -60,6 +67,8 @@ public class TsdbChannel implements KafkaChannel {
 
     @Override
     public void updateMetric(String metricType, Long timestamp, Double value, Map<String, String> tags) {
-
+        builder.addMetric(metricType)
+                .setDataPoint(timestamp, value)
+                .addTags(tags);
     }
 }

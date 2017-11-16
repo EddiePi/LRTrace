@@ -23,7 +23,8 @@ public class WindowManager {
 
     private TracerConf conf = TracerConf.getInstance();
 
-    Map<Long, Map<String, AnalysisContainer>> slidingWindow;
+    //public for test
+    public Map<Long, Map<String, AnalysisContainer>> slidingWindow;
 
     private int windowSize;
     private int windowInterval;
@@ -196,6 +197,6 @@ public class WindowManager {
     }
 
     public boolean hasMoreData() {
-        return slidingWindow.size() == 0 ? false : true;
+        return slidingWindow.size() != 0;
     }
 }

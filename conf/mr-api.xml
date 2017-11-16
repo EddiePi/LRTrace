@@ -5,7 +5,7 @@
         <dateOffset>-7200000</dateOffset>
         <group>
             <name>merge</name>
-            <type>state</type>
+            <type>instant</type>
             <isFinish>false</isFinish>
             <value>byte</value>
         </group>
@@ -17,13 +17,13 @@
         <dateOffset>-7200000</dateOffset>
         <group>
             <name>spill.key</name>
-            <type>state</type>
+            <type>instant</type>
             <isFinish>false</isFinish>
             <value>kbyte</value>
         </group>
         <group>
             <name>spill.value</name>
-            <type>state</type>
+            <type>instant</type>
             <isFinish>false</isFinish>
             <value>vbyte</value>
         </group>
@@ -35,7 +35,7 @@
         <group>
             <!-- required -->
             <name>fetcher</name>
-            <type>state</type>
+            <type>instant</type>
             <tag>fetcherId</tag>
             <!-- optional, default: false -->
             <isFinish>false</isFinish>
@@ -43,7 +43,7 @@
         </group>
         <!--group>
             <name>fetched.byte</name>
-            <type>state</type>
+            <type>instant</type>
             <tag>fetcherId</tag>
             <isFinish>false</isFinish>
             <value>byte</value>
@@ -54,7 +54,7 @@
         <dateOffset>-7200000</dateOffset>
         <group>
             <name>fetcher</name>
-            <type>event</type>
+            <type>period</type>
             <tag>fetcherId</tag>
             <isFinish>true</isFinish>
             <value>1.0</value>

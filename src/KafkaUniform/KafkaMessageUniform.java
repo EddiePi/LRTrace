@@ -33,7 +33,7 @@ public class KafkaMessageUniform {
 
     LogAPICollector collector = LogAPICollector.getInstance();
 
-    final Map<String, List<PackedMessage>> eventMessagesMap;
+    final Map<String, List<PackedMessage>> periodMessagesMap;
 
 
     // if a event lasts less than 1s, it might be cleared before gets sent.
@@ -43,7 +43,7 @@ public class KafkaMessageUniform {
     List<KafkaChannel> channelList;
 
     public KafkaMessageUniform() {
-        eventMessagesMap = new HashMap<>();
+        periodMessagesMap = new HashMap<>();
         shortEventMessageList = new LinkedList<>();
         props = new Properties();
         props.put("bootstrap.servers", conf.getStringOrDefault("tracer.kafka.bootstrap.servers", "localhost:9092"));
@@ -70,8 +70,6 @@ public class KafkaMessageUniform {
                 case "window": channelList.add(new WindowChannel());break;
             }
         }
-
-
     }
 
     private class PullRunnable implements Runnable {
@@ -86,7 +84,7 @@ public class KafkaMessageUniform {
                     String key = record.key();
                     String value = record.value();
                     if (value.matches("container.* is finished\\.")) {
-                        removeEventMessage(value.split(" ")[0]);
+                        removePeriodMessage(value.split(" ")[0]);
                         continue;
                     }
                     if (key.matches("testlog-log")) {
@@ -116,7 +114,7 @@ public class KafkaMessageUniform {
 
     public void stop() {
         pullRunnable.isRunning = false;
-        eventMessagesMap.clear();
+        periodMessagesMap.clear();
     }
 
     private boolean metricTransformer(String metricStr) {
@@ -165,7 +163,7 @@ public class KafkaMessageUniform {
         if (packedMessageList.size() == 0) {
             return false;
         }
-        buildPackedMessage(packedMessageList);
+        sendPackedMessage(packedMessageList);
         return true;
     }
 
@@ -192,6 +190,7 @@ public class KafkaMessageUniform {
                         String type = group.type;
                         Long timestamp = LogReaderManager.parseTimestamp(logMessage) + messageMark.dateOffset;
                         Double value;
+                        name = type + ":" + name;
                         if (valueStr.matches("^[-+]?[\\d]*(\\.\\d*)?$")) {
                             value = Double.valueOf(valueStr);
                         } else {
@@ -205,11 +204,11 @@ public class KafkaMessageUniform {
                         }
                         PackedMessage packedMessage =
                                 new PackedMessage(componentId, timestamp, name, tagMap, value, type);
-                        if (type.equals("state")) {
+                        if (type.equals("instant")) {
                             packedMessagesList.add(packedMessage);
                         } else {
                             packedMessage.isFinish = group.isFinish;
-                            updateEventMessage(packedMessage);
+                            updatePeriodMessage(packedMessage);
                         }
                         // TEST
                         // System.out.printf("packed message: %s\n", packedMessage);
@@ -233,7 +232,7 @@ public class KafkaMessageUniform {
         if (packedMessageList.size() == 0) {
             return false;
         }
-        buildPackedMessage(packedMessageList);
+        sendPackedMessage(packedMessageList);
         return true;
     }
 
@@ -252,6 +251,9 @@ public class KafkaMessageUniform {
                         Long timestamp = LogReaderManager.parseTimestamp(logMessage) + messageMark.dateOffset;
                         Double value = null;
                         String containerId = "";
+
+                        // we associate the name with its type
+                        name = type + ":" + name;
                         if (!name.equals("state")) {
                             if (valueStr.matches("^[-+]?[\\d]*(\\.\\d*)?$")) {
                                 value = Double.valueOf(valueStr);
@@ -281,11 +283,11 @@ public class KafkaMessageUniform {
                         if (value != null) {
                             PackedMessage packedMessage =
                                     new PackedMessage(containerId, timestamp, name, tagMap, value == null ? 1d : value, type);
-                            if (type.equals("state")) {
+                            if (type.equals("instant")) {
                                 packedMessagesList.add(packedMessage);
                             } else {
                                 packedMessage.isFinish = group.isFinish;
-                                updateEventMessage(packedMessage);
+                                updatePeriodMessage(packedMessage);
                             }
                         }
                     } catch (IllegalStateException e) {
@@ -299,10 +301,14 @@ public class KafkaMessageUniform {
         return packedMessagesList;
     }
 
-    private void buildEventMessage() {
+    @Deprecated
+    /**
+     * This function interact with tsdb.
+     */
+    private void buildPeriodMessage() {
         Long timestamp = System.currentTimeMillis();
-        synchronized (this.eventMessagesMap) {
-            for (List<PackedMessage> mList : eventMessagesMap.values()) {
+        synchronized (this.periodMessagesMap) {
+            for (List<PackedMessage> mList : periodMessagesMap.values()) {
                 for (PackedMessage m : mList) {
                     m.firstSend = false;
                     if (!m.containerId.equals("")) {
@@ -326,17 +332,17 @@ public class KafkaMessageUniform {
         }
     }
 
-    private void updateEventMessage(PackedMessage message) {
-        int index = hasEventMessage(message);
-        synchronized (this.eventMessagesMap) {
+    private void updatePeriodMessage(PackedMessage message) {
+        int index = hasPeriodMessage(message);
+        synchronized (this.periodMessagesMap) {
             List<PackedMessage> packedMessageList;
             if (index < 0 && !message.isFinish) {
-                packedMessageList = eventMessagesMap.getOrDefault(message.containerId, new ArrayList<>());
+                packedMessageList = periodMessagesMap.getOrDefault(message.containerId, new ArrayList<>());
                 packedMessageList.add(message);
-                eventMessagesMap.put(message.containerId, packedMessageList);
+                periodMessagesMap.put(message.containerId, packedMessageList);
             } else if (index >= 0 && message.isFinish) {
                 PackedMessage oldMessage =
-                        eventMessagesMap.get(message.containerId).remove(index);
+                        periodMessagesMap.get(message.containerId).remove(index);
                 if (oldMessage.firstSend) {
                     synchronized (this.shortEventMessageList) {
                         shortEventMessageList.add(oldMessage);
@@ -346,22 +352,22 @@ public class KafkaMessageUniform {
         }
     }
 
-    private void removeEventMessage(String key) {
-        synchronized (this.eventMessagesMap) {
-            eventMessagesMap.remove(key);
+    private void removePeriodMessage(String key) {
+        synchronized (this.periodMessagesMap) {
+            periodMessagesMap.remove(key);
         }
     }
 
     /**
-     * check if we already record the event message in <code>eventMessagesMap</code>
+     * check if we already record the event message in <code>periodMessagesMap</code>
      *
      * @param message
      * @return if we find the message, return the index; otherwise return -1
      */
-    private int hasEventMessage(PackedMessage message) {
+    private int hasPeriodMessage(PackedMessage message) {
         int index = -1;
         List<PackedMessage> packedMessagesInContainer;
-        if ((packedMessagesInContainer = eventMessagesMap.get(message.containerId)) != null) {
+        if ((packedMessagesInContainer = periodMessagesMap.get(message.containerId)) != null) {
             for (int i = 0; i < packedMessagesInContainer.size(); i++)
                 if (packedMessagesInContainer.get(i).isCounterPart(message)) {
                     index = i;
@@ -372,6 +378,11 @@ public class KafkaMessageUniform {
         return index;
     }
 
+    /**
+     * Packthe RM message that match the .xml file. We do not check 'period' message, since RM messages are always instant
+     * @param kafkaMessage
+     * @return
+     */
     private boolean maybeBuildRMMessage(String kafkaMessage) {
         String logMessage = kafkaMessage;
         boolean hasMessage = false;
@@ -454,7 +465,7 @@ public class KafkaMessageUniform {
         return hasMessage;
     }
 
-    private void buildPackedMessage(List<PackedMessage> packedMessageList) {
+    private void sendPackedMessage(List<PackedMessage> packedMessageList) {
         for (PackedMessage packedMessage : packedMessageList) {
             String appId = containerIdToShortAppId(packedMessage.containerId);
             if (!packedMessage.containerId.equals("")) {

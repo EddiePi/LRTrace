@@ -5,7 +5,7 @@
         <group>
             <!-- required -->
             <name>stage</name>
-            <type>state</type>
+            <type>instant</type>
             <tag>stageID</tag>
             <!-- optional, default: false -->
             <isFinish>false</isFinish>
@@ -13,7 +13,7 @@
         </group>
         <!--group>
             <name>task</name>
-            <type>event</type>
+            <type>period</type>
             <tag>TID</tag>
             <isFinish>false</isFinish>
             <value>1</value>
@@ -24,21 +24,21 @@
         <dateOffset>-7200000</dateOffset>
         <group>
             <name>stage</name>
-            <type>state</type>
+            <type>instant</type>
             <tag>stageID</tag>
             <isFinish>false</isFinish>
             <value>1</value>
         </group>
         <!--group>
             <name>task</name>
-            <type>event</type>
+            <type>period</type>
             <tag>TID</tag>
             <isFinish>true</isFinish>
             <value>1</value>
         </group-->
         <group>
             <name>byte.transferred</name>
-            <type>state</type>
+            <type>instant</type>
             <isFinish>true</isFinish>
             <value>byte</value>
         </group>
@@ -48,7 +48,7 @@
         <dateOffset>-7200000</dateOffset>
         <!--group>
             <name>task</name>
-            <type>event</type>
+            <type>period</type>
             <tag>TID</tag>
             <isFinish>true</isFinish>
             <value>1</value>
@@ -59,7 +59,7 @@
         <dateOffset>-7200000</dateOffset>
         <group>
             <name>byte.stored</name>
-            <type>state</type>
+            <type>instant</type>
             <isFinish>true</isFinish>
             <value>byte</value>
         </group>
@@ -69,7 +69,7 @@
         <dateOffset>-7200000</dateOffset>
         <group>
             <name>byte.spill</name>
-            <type>state</type>
+            <type>instant</type>
             <tag>TID</tag>
             <isFinish>true</isFinish>
             <value>byte</value>
@@ -80,7 +80,7 @@
         <dateOffset>-7200000</dateOffset>
         <group>
             <name>byte.spill</name>
-            <type>state</type>
+            <type>instant</type>
             <isFinish>false</isFinish>
             <value>byte</value>
         </group>
@@ -90,7 +90,7 @@
         <dateOffset>-7200000</dateOffset>
         <group>
             <name>shuffle</name>
-            <type>event</type>
+            <type>period</type>
             <isFinish>false</isFinish>
             <value>1.0</value>
         </group>
@@ -100,7 +100,7 @@
         <dateOffset>-7200000</dateOffset>
         <group>
             <name>shuffle</name>
-            <type>event</type>
+            <type>period</type>
             <isFinish>true</isFinish>
             <value>1.0</value>
         </group>

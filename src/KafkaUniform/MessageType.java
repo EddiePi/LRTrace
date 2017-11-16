@@ -1,8 +1,8 @@
-package KafkaUniform.tsdb;
+package KafkaUniform;
 
 /**
  * Created by Eddie on 2017/11/14.
  */
 public enum MessageType {
-    EVENT, STATE
+    PERIOD, INSTANT
 }

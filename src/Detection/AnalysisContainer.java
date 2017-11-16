@@ -1,12 +1,15 @@
 package Detection;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Eddie on 2017/11/8.
  */
 public class AnalysisContainer {
     private String containerId;
+    private String appId;
     private Long timestamp;
 
     // resource metrics;
@@ -19,19 +22,32 @@ public class AnalysisContainer {
     public double netRate;
 
     //logs
-    public List<KeyedMessage> periodMessages;
-    public List<KeyedMessage> instantMessages;
+    public Map<String, List<KeyedMessage>> periodMessages;
+    public Map<String, List<KeyedMessage>> instantMessages;
+
+    public AnalysisContainer() {
+        periodMessages = new HashMap<>();
+        instantMessages = new HashMap<>();
+    }
 
     public String getContainerId() {
         return containerId;
     }
 
-    public Long getTimestamp() {
-        return timestamp;
-    }
-
     public void setContainerId(String containerId) {
         this.containerId = containerId;
+    }
+
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
     }
 
     public void setTimestamp(Long timestamp) {

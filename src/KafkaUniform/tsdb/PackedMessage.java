@@ -1,5 +1,7 @@
 package KafkaUniform.tsdb;
 
+import KafkaUniform.MessageType;
+
 import java.io.Serializable;
 import java.util.Formatter;
 import java.util.Map;
@@ -27,7 +29,7 @@ public class PackedMessage implements Serializable {
         this.name = name;
         this.tagMap = tagMap;
         this.doubleValue = value;
-        this.type = MessageType.STATE;
+        this.type = MessageType.INSTANT;
     }
 
     public PackedMessage(String containerId,
@@ -41,10 +43,10 @@ public class PackedMessage implements Serializable {
         this.name = name;
         this.tagMap = tagMap;
         this.doubleValue = value;
-        if(type.equals("event")) {
-            this.type = MessageType.EVENT;
+        if(type.equals("period")) {
+            this.type = MessageType.PERIOD;
         } else {
-            this.type = MessageType.STATE;
+            this.type = MessageType.INSTANT;
         }
     }
 

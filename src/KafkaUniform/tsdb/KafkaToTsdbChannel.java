@@ -252,7 +252,7 @@ public class KafkaToTsdbChannel {
                         }
                         PackedMessage packedMessage =
                                 new PackedMessage(componentId, timestamp, name, tagMap, value, type);
-                        if(type.equals("state")) {
+                        if(type.equals("instant")) {
                             packedMessagesList.add(packedMessage);
                         } else {
                             packedMessage.isFinish = group.isFinish;
@@ -328,7 +328,7 @@ public class KafkaToTsdbChannel {
                         if (value != null) {
                             PackedMessage packedMessage =
                                     new PackedMessage(containerId, timestamp, name, tagMap, value == null ? 1d : value, type);
-                            if (type.equals("state")) {
+                            if (type.equals("instant")) {
                                 packedMessagesList.add(packedMessage);
                             } else {
                                 packedMessage.isFinish = group.isFinish;

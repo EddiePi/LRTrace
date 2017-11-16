@@ -1,17 +1,20 @@
 package Detection;
 
-import java.util.List;
+import KafkaUniform.MessageType;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Eddie on 2017/11/9.
  */
 public class KeyedMessage {
-    String key;
-    List<String> identifiers;
-    double value;
-    MessageType type;
+    public String key;
+    public Map<String, String> identifiers;
+    public double value;
+    public MessageType type;
 
-    public enum MessageType {
-        PERIOD, INSTANT
+    public KeyedMessage() {
+        identifiers = new HashMap<>();
     }
 }

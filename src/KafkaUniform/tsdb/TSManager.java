@@ -1,19 +1,21 @@
 package KafkaUniform.tsdb;
 
+import KafkaUniform.KafkaMessageUniform;
+
 /**
  * Created by Eddie on 2017/6/22.
  */
 public class TSManager {
-    KafkaToTsdbChannel kafkaToTsdbChannel;
+    KafkaMessageUniform kafkaMessageUniform;
     public TSManager() {
-        kafkaToTsdbChannel = new KafkaToTsdbChannel();
+        kafkaMessageUniform = new KafkaMessageUniform();
     }
 
     public void start() {
-        kafkaToTsdbChannel.start();
+        kafkaMessageUniform.start();
     }
 
     public void stop() {
-        kafkaToTsdbChannel.stop();
+        kafkaMessageUniform.stop();
     }
 }

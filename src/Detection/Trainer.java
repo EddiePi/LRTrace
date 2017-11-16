@@ -52,16 +52,18 @@ public class Trainer {
 
                 for(AnalysisContainer container: containerMap.values()) {
                     Map<String, Integer> keyToNumber = new HashMap<>();
-                    for (KeyedMessage message: container.periodMessages) {
-                        periodKeySet.add(message.key);
-                        String key = message.key;
-                        Integer number = keyToNumber.get(key);
-                        if (number != null) {
-                            number++;
-                        } else {
-                            number = 1;
+                    for (List<KeyedMessage> messageList : container.periodMessages.values()) {
+                        for (KeyedMessage message : messageList) {
+                            periodKeySet.add(message.key);
+                            String key = message.key;
+                            Integer number = keyToNumber.get(key);
+                            if (number != null) {
+                                number++;
+                            } else {
+                                number = 1;
+                            }
+                            keyToNumber.put(key, number);
                         }
-                        keyToNumber.put(key, number);
                     }
                     containerToKeyToNumber.put(container.getContainerId(), keyToNumber);
                 }
