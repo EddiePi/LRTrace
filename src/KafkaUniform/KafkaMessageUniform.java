@@ -312,7 +312,7 @@ public class KafkaMessageUniform {
                 for (PackedMessage m : mList) {
                     m.firstSend = false;
                     if (!m.containerId.equals("")) {
-                        m.tagMap.put("container", parseShortContainerId(m.containerId));
+                        m.tagMap.put("container", m.containerId);
                         m.tagMap.put("app", containerIdToShortAppId(m.containerId));
                     }
                     sendLogToAllChannel(m.name, timestamp, m.doubleValue,m.tagMap);
@@ -323,7 +323,7 @@ public class KafkaMessageUniform {
         synchronized (this.shortEventMessageList) {
             for (PackedMessage m : shortEventMessageList) {
                 if (!m.containerId.equals("")) {
-                    m.tagMap.put("container", parseShortContainerId(m.containerId));
+                    m.tagMap.put("container", m.containerId);
                     m.tagMap.put("app", containerIdToShortAppId(m.containerId));
                 }
                 sendLogToAllChannel(m.name, timestamp, m.doubleValue,m.tagMap);
@@ -445,7 +445,7 @@ public class KafkaMessageUniform {
                                 tagMap.put("app.attempt", appAttemptId);
                             } else if (tagName.equals("container")) {
                                 appId = containerIdToShortAppId(tagValue);
-                                String shortContainerId = parseShortContainerId(tagValue);
+                                String shortContainerId = tagValue;
                                 tagMap.put("app", appId);
                                 tagMap.put("container", shortContainerId);
                             }
@@ -469,7 +469,7 @@ public class KafkaMessageUniform {
         for (PackedMessage packedMessage : packedMessageList) {
             String appId = containerIdToShortAppId(packedMessage.containerId);
             if (!packedMessage.containerId.equals("")) {
-                packedMessage.tagMap.put("container", parseShortContainerId(packedMessage.containerId));
+                packedMessage.tagMap.put("container", packedMessage.containerId);
                 packedMessage.tagMap.put("app", appId);
             }
             sendLogToAllChannel(packedMessage.name, packedMessage.timestamp, packedMessage.doubleValue, packedMessage.tagMap);
@@ -481,7 +481,7 @@ public class KafkaMessageUniform {
         String appId = containerIdToShortAppId(containerId);
         Map<String, String> tagMap = new HashMap<>();
         tagMap.put("app", appId);
-        tagMap.put("container", parseShortContainerId(containerId));
+        tagMap.put("container", containerId);
         if (metrics.length > 9) {
             for (int i = 9; i < metrics.length; i++) {
                 String[] tagNValue = metrics[i].split(":");
@@ -552,11 +552,7 @@ public class KafkaMessageUniform {
         }
     }
 
-    private String parseShortContainerId(String containerId) {
-        String[] parts = containerId.split("_");
-        String shortId = parts[parts.length - 2] + "_" + parts[parts.length - 1];
-        return shortId;
-    }
+
 
     private String containerIdToShortAppId(String containerId) {
         String[] parts = containerId.split("_");

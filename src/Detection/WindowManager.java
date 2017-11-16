@@ -29,6 +29,9 @@ public class WindowManager {
     private int windowSize;
     private int windowInterval;
 
+    /**
+     * this is used to synchronize the first timestamp index of the running app.
+     */
     private Boolean firstData = true;
     private Long currentStartTimestamp;
 
@@ -48,18 +51,24 @@ public class WindowManager {
         @Override
         public void run() {
             while(isChecking) {
-                if(!hasMoreData() && idleCount < 6) {
+                if(!hasMoreData() && idleCount < 3) {
                     idleCount++;
                 }
-                if (idleCount >= 6 && !firstData) {
-
+                if (idleCount >= 3 && !firstData) {
                     firstData = true;
                 }
+                maybeStoreWindow();
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+
+        private void maybeStoreWindow() {
+            if (slidingWindow.size() != 0 && idleCount >= 3) {
+                storeSlidingWindow();
             }
         }
 
@@ -141,8 +150,8 @@ public class WindowManager {
                 currentStartTimestamp = timestamp;
                 firstData = false;
             }
-            selfCheckingRunnable.resetCount();
         }
+        selfCheckingRunnable.resetCount();
 
         // If the incoming data is out of date, we do not create it in the sliding window.
         if (timestamp < currentStartTimestamp) {

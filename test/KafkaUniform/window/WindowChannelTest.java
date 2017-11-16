@@ -1,10 +1,13 @@
 package KafkaUniform.window;
 
+import Detection.AnalysisContainer;
 import Detection.WindowManager;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -45,7 +48,7 @@ public class WindowChannelTest {
         testMap1.put("state", "s1");
 
         Map<String, String> testMap2 = new HashMap<>();
-        testMap2.put("container", "01_000001");
+        testMap2.put("container", "01_000002");
         testMap2.put("app", "app1");
         testMap2.put("task", "t2");
         testMap2.put("state", "s1");
@@ -54,7 +57,11 @@ public class WindowChannelTest {
             windowChannel.updateLog("period:task", timestamp, 1d, testMap1);
             windowChannel.updateLog("period:task", timestamp++, 1d, testMap2);
         }
-        windowManager.slidingWindow.isEmpty();
+        List<List<Map<String, AnalysisContainer>>> allWindowedData = new ArrayList<>();
+        while(!windowManager.slidingWindow.isEmpty()) {
+            allWindowedData.add(windowManager.getWindowedDataForAnalysis());
+        }
+        allWindowedData.isEmpty();
     }
 
 }

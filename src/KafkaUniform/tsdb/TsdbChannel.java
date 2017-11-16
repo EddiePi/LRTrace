@@ -20,17 +20,18 @@ public class TsdbChannel implements KafkaChannel {
     Thread transferThread;
 
     public TsdbChannel() {
-        databaseURI = conf.getStringOrDefault("tracer.tsdb.server", "localhost:4242");
-        if (!databaseURI.matches("http://.*")) {
-            databaseURI = "http://" + databaseURI;
-        }
-        if (!databaseURI.matches(".*/api/put")) {
-            databaseURI = databaseURI + "/api/put";
-        }
-
-        transferRunnable = new TransferRunnable();
-        transferThread = new Thread(transferRunnable);
-        transferThread.start();
+//        conf = TracerConf.getInstance();
+//        databaseURI = conf.getStringOrDefault("tracer.tsdb.server", "localhost:4242");
+//        if (!databaseURI.matches("http://.*")) {
+//            databaseURI = "http://" + databaseURI;
+//        }
+//        if (!databaseURI.matches(".*/api/put")) {
+//            databaseURI = databaseURI + "/api/put";
+//        }
+//
+//        transferRunnable = new TransferRunnable();
+//        transferThread = new Thread(transferRunnable);
+//        transferThread.start();
     }
 
     private class TransferRunnable implements Runnable {
@@ -60,6 +61,7 @@ public class TsdbChannel implements KafkaChannel {
 
     @Override
     public void updateLog(String key, Long timestamp, Double value, Map<String, String> tags) {
+        parseShortContainerId(tags);
         builder.addMetric(key)
                 .setDataPoint(timestamp, value)
                 .addTags(tags);
@@ -67,8 +69,19 @@ public class TsdbChannel implements KafkaChannel {
 
     @Override
     public void updateMetric(String metricType, Long timestamp, Double value, Map<String, String> tags) {
+        parseShortContainerId(tags);
         builder.addMetric(metricType)
                 .setDataPoint(timestamp, value)
                 .addTags(tags);
+    }
+
+    private void parseShortContainerId(Map<String, String> tags) {
+        String longContainerId = tags.get("container");
+        if (longContainerId == null) {
+            return;
+        }
+        String[] parts = longContainerId.split("_");
+        String shortId = parts[parts.length - 2] + "_" + parts[parts.length - 1];
+        tags.put("container", shortId);
     }
 }
