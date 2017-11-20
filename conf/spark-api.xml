@@ -11,13 +11,13 @@
             <isFinish>false</isFinish>
             <value>stageID</value>
         </group>
-        <!--group>
+        <group>
             <name>task</name>
             <type>period</type>
             <tag>TID</tag>
             <isFinish>false</isFinish>
             <value>1</value>
-        </group-->
+        </group>
     </rule>
     <rule>
         <regex>.*Finished task.*in (?&lt;stageID&gt;stage [0-9]+\.[0-9]).*TID (?&lt;TID&gt;[0-9]+).*\s(?&lt;byte&gt;[0-9]+).*</regex>
@@ -29,13 +29,13 @@
             <isFinish>false</isFinish>
             <value>1</value>
         </group>
-        <!--group>
+        <group>
             <name>task</name>
             <type>period</type>
             <tag>TID</tag>
             <isFinish>true</isFinish>
             <value>1</value>
-        </group-->
+        </group>
         <group>
             <name>byte.transferred</name>
             <type>instant</type>
@@ -46,13 +46,13 @@
     <rule>
         <regex>.*Executor killed task.*in(?&lt;stageID&gt;stage [0-9]+\.[0-9]).*TID (?&lt;TID&gt;[0-9]+).*</regex>
         <dateOffset>-7200000</dateOffset>
-        <!--group>
+        <group>
             <name>task</name>
             <type>period</type>
             <tag>TID</tag>
             <isFinish>true</isFinish>
             <value>1</value>
-        </group-->
+        </group>
     </rule>
     <rule>
         <regex>.*stored as (?:values|bytes) in memory.*estimated size (?&lt;byte&gt;[0-9]+\.[0-9]+.*),.*</regex>

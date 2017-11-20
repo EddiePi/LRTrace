@@ -56,6 +56,24 @@ public class WindowManagerTest {
     @Test
     public void loadSlidingWindow() throws Exception {
         wm.loadSlidingWindow();
+        for (Map.Entry<Long, Map<String, AnalysisContainer>> entry: wm.slidingWindow.entrySet()) {
+            System.out.printf("*time window: %d\n", entry.getKey());
+            for (Map.Entry<String, AnalysisContainer> containerEntry: entry.getValue().entrySet()) {
+                System.out.printf("**containerId: %s\n", containerEntry.getKey());
+                if (containerEntry.getValue().periodMessages.size() > 0) {
+                    System.out.printf("***period: \n");
+                    for (String messageKey : containerEntry.getValue().periodMessages.keySet()) {
+                        System.out.printf("****period key: %s\n", messageKey);
+                    }
+                }
+                if (containerEntry.getValue().instantMessages.size() > 0) {
+                    System.out.printf("***instant: \n");
+                    for (String messageKey : containerEntry.getValue().instantMessages.keySet()) {
+                        System.out.printf("****instant key: %s\n", messageKey);
+                    }
+                }
+            }
+        }
     }
 
     @Test

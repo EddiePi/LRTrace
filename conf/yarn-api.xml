@@ -5,7 +5,7 @@
         <group>
             <!-- required -->
             <name>state</name>
-            <type>state</type>
+            <type>instant</type>
             <tag>container</tag>
             <tag>state</tag>
             <!-- optional, default: false -->
@@ -18,7 +18,7 @@
         <dateOffset>0</dateOffset>
         <group>
             <name>state</name>
-            <type>state</type>
+            <type>instant</type>
             <tag>container</tag>
             <isFinish>false</isFinish>
             <value>1</value>
@@ -29,7 +29,7 @@
         <dateOffset>0</dateOffset>
         <group>
             <name>app.state</name>
-            <type>state</type>
+            <type>instant</type>
             <tag>app</tag>
             <tag>state</tag>
             <isFinish>false</isFinish>
@@ -41,7 +41,7 @@
         <dateOffset>0</dateOffset>
         <group>
             <name>app.attempt.state</name>
-            <type>state</type>
+            <type>instant</type>
             <tag>appAttempt</tag>
             <tag>state</tag>
             <isFinish>false</isFinish>
@@ -53,7 +53,7 @@
         <dateOffset>0</dateOffset>
         <group>
             <name>rm.container.state</name>
-            <type>state</type>
+            <type>instant</type>
             <tag>container</tag>
             <tag>state</tag>
             <isFinish>false</isFinish>

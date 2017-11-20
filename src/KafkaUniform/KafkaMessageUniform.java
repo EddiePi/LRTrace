@@ -76,6 +76,7 @@ public class KafkaMessageUniform {
 
     private class PullRunnable implements Runnable {
         boolean isRunning = true;
+        Long lastPeriodSendingTime = System.currentTimeMillis();
 
         @Override
         public void run() {
@@ -107,6 +108,10 @@ public class KafkaMessageUniform {
                     } else {
                         System.out.printf("unrecognized kafka key: %s\n", key);
                     }
+                }
+                if (System.currentTimeMillis() - 1 >= lastPeriodSendingTime) {
+                    lastPeriodSendingTime = System.currentTimeMillis();
+                    sendPeriodMessage();
                 }
                 try {
                     Thread.sleep(50);
@@ -141,7 +146,7 @@ public class KafkaMessageUniform {
             Double diskServiceTime = Double.valueOf(metrics[5]);
             Double diskWaitTime = Double.valueOf(metrics[6]);
             Double diskIOTime = Double.valueOf(metrics[7]);
-            Double netRate = Double.valueOf(metrics[8]) + Double.valueOf(metrics[9]);
+            Double netByte = Double.valueOf(metrics[8]) + Double.valueOf(metrics[9]);
             Map<String, String> tagMap = buildAllTags(metrics);
             for (KafkaChannel channel: channelList) {
                 channel.updateMetric("cpu", timestamp, cpuUsage, tagMap);
@@ -150,7 +155,7 @@ public class KafkaMessageUniform {
                 channel.updateMetric("disk.service.time", timestamp, diskServiceTime, tagMap);
                 channel.updateMetric("disk.wait.time", timestamp, diskWaitTime, tagMap);
                 channel.updateMetric("diskIOTime", timestamp, diskIOTime, tagMap);
-                channel.updateMetric("network", timestamp, netRate, tagMap);
+                channel.updateMetric("network", timestamp, netByte, tagMap);
             }
 
         } catch (NumberFormatException e) {
@@ -311,11 +316,10 @@ public class KafkaMessageUniform {
         return packedMessagesList;
     }
 
-    @Deprecated
     /**
-     * This function interact with tsdb.
+     * Send period messages at fixed interval. (1s default)
      */
-    private void buildPeriodMessage() {
+    private void sendPeriodMessage() {
         Long timestamp = System.currentTimeMillis();
         synchronized (this.periodMessagesMap) {
             for (List<PackedMessage> mList : periodMessagesMap.values()) {
@@ -343,6 +347,7 @@ public class KafkaMessageUniform {
     }
 
     private void updatePeriodMessage(PackedMessage message) {
+        System.out.printf("updating period message: %s\n", message.toString());
         int index = hasPeriodMessage(message);
         synchronized (this.periodMessagesMap) {
             List<PackedMessage> packedMessageList;
