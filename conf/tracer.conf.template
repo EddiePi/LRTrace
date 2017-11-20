@@ -1,21 +1,22 @@
 tracer.docker.monitor-interval      20
 tracer.docker.monitor.ms-resolution     false
 
-tracer.kafka.bootstrap.servers   localhost:9092
+tracer.kafka.bootstrap.servers   disco-0011:9092,disco-0012:9092,disco-0013:9092
 
 tracer.log.app.root             /home/eddie/hadoop-2.7.3/logs/userlogs
 tracer.log.nodemanager.root     /home/eddie/hadoop-2.7.3/logs
-tracer.log.spark-api.path       ../conf/spark.api
-tracer.log.mr-api.path          ../conf/mr.api
+tracer.log.spark-api.path       ../conf/spark-api.xml
+tracer.log.mr-api.path          ../conf/mr-api.xml
+tracer.log yarn-api path"       ../conf/yarn-api.xml
 tracer.log.custom-api.enabled   false
-tracer.log.custom-api.path      ./custom.api
+tracer.log.custom-api.path      ./custom-api.xml
 
 tracer.log.testmode.enabled     false
 tracer.log.testmode.dir         /home/eddie/testdir/test.log
 
 tracer.channels                 tsdb, window
 
-tracer.tsdb.server              localhost:4242
+tracer.tsdb.server              disco-0011:4242
 
 tracer.system-monitor.enabled   true
 

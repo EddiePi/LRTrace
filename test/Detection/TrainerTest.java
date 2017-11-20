@@ -19,7 +19,6 @@ public class TrainerTest {
     public void setUp() throws Exception {
         trainer = new Trainer();
         wm = WindowManager.getInstance();
-        wm.instantiateWindow(3, 2);
         Long timeBoundary = 10L;
         Integer idBoundary = 4;
         Random CPURandom = new Random();

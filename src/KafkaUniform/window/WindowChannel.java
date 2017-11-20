@@ -22,6 +22,7 @@ public class WindowChannel implements KafkaChannel {
 
     @Override
     public void updateMetric(String metricType, Long timestamp, Double value, Map<String, String> tags) {
+        System.out.print("update Metrics.\n");
         AnalysisContainer containerToUpdate = wm.getContainerToAssign(timestamp, tags.get("container"));
         containerToUpdate.setTimestamp(timestamp);
         assignId(containerToUpdate, tags);
@@ -38,6 +39,7 @@ public class WindowChannel implements KafkaChannel {
 
     @Override
     public void updateLog(String key, Long timestamp, Double value, Map<String, String> tags) {
+        System.out.print("update log.\n");
         AnalysisContainer containerToUpdate = wm.getContainerToAssign(timestamp, tags.get("container"));
         containerToUpdate.setTimestamp(timestamp);
         assignId(containerToUpdate, tags);

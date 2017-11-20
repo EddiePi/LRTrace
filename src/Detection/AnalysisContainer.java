@@ -1,5 +1,6 @@
 package Detection;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Map;
 /**
  * Created by Eddie on 2017/11/8.
  */
-public class AnalysisContainer {
+public class AnalysisContainer implements Serializable {
     private String containerId;
     private String appId;
     private Long timestamp;

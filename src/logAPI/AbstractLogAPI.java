@@ -21,7 +21,7 @@ public abstract class AbstractLogAPI {
 
     void parseFile() throws IOException {
         if(!apiFile.exists()) {
-            System.out.print("api file does not exist.\n");
+            System.out.printf("api file: '%s' does not exist.\n", apiFile.getName());
             return;
         }
         messageMarkList = XMLParser.parse(apiFile.getCanonicalPath());

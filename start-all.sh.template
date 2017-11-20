@@ -1,5 +1,5 @@
 #!/bin/bash
-export TRACINGSERVER_HOME=/home/eddie/tracing-server-2.0
+export TRACINGSERVER_HOME=/home/eddie/hookup
 
 $TRACINGSERVER_HOME/run.sh
 while read LINE

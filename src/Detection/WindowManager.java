@@ -6,9 +6,10 @@ import Utils.ObjPersistent;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by Eddie on 2017/11/9.
+ *
  */
 public class WindowManager {
 
@@ -26,8 +27,8 @@ public class WindowManager {
     //public for test
     public Map<Long, Map<String, AnalysisContainer>> slidingWindow;
 
-    private int windowSize;
-    private int windowInterval;
+    private int windowSize = conf.getIntegerOrDefault("tracer.window.size", 3);
+    private int windowInterval = conf.getIntegerOrDefault("tracer.window.interval", 2);
 
     /**
      * this is used to synchronize the first timestamp index of the running app.
@@ -46,18 +47,19 @@ public class WindowManager {
     private class SelfCheckingRunnable implements Runnable {
 
         boolean isChecking = true;
-        int idleCount = 0;
+        AtomicInteger idleCount = new AtomicInteger(0);
 
         @Override
         public void run() {
             while(isChecking) {
-                if(!hasMoreData() && idleCount < 3) {
-                    idleCount++;
+                if((mode.equals("detection") && !hasMoreData() || mode.equals("storage")) &&
+                        idleCount.get() < 3) {
+                    idleCount.incrementAndGet();
                 }
-                if (idleCount >= 3 && !firstData) {
+                if (idleCount.get() >= 3 && !firstData) {
+                    maybeStoreWindow();
                     firstData = true;
                 }
-                maybeStoreWindow();
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -67,23 +69,17 @@ public class WindowManager {
         }
 
         private void maybeStoreWindow() {
-            if (slidingWindow.size() != 0 && idleCount >= 3) {
+            if (slidingWindow.size() != 0) {
                 storeSlidingWindow();
             }
         }
 
         public void resetCount() {
-            idleCount = 0;
+            idleCount.set(0);
         }
     }
 
     private WindowManager() {
-    }
-
-    public void instantiateWindow(int size, int interval) {
-
-        windowSize = size;
-        windowInterval = interval;
         if (windowInterval > windowSize) {
             windowInterval = windowSize;
         }
@@ -144,6 +140,9 @@ public class WindowManager {
      */
     public AnalysisContainer getContainerToAssign(Long timestamp, String containerId) {
 
+        if (timestamp.toString().length() > 10) {
+            timestamp /= 1000;
+        }
 
         if (firstData && !hasMoreData()) {
             synchronized (this.firstData) {
@@ -189,6 +188,7 @@ public class WindowManager {
             }
         }
         ObjPersistent.saveObject(slidingWindow, storagePath + "/" + dataFilePrefix + existingDataFiles.toString());
+        slidingWindow.clear();
     }
 
     public void loadSlidingWindow() {
@@ -203,6 +203,8 @@ public class WindowManager {
                 fileIndex++;
             }
         }
+
+        slidingWindow.isEmpty();
     }
 
     public boolean hasMoreData() {

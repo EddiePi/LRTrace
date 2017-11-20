@@ -56,6 +56,8 @@ public class KafkaMessageUniform {
         kafkaTopics = Arrays.asList("trace", "log");
         consumer.subscribe(kafkaTopics);
 
+        initAllChannel();
+
 
         pullRunnable = new PullRunnable();
         transferThread = new Thread(pullRunnable);
@@ -83,6 +85,9 @@ public class KafkaMessageUniform {
                 for (ConsumerRecord<String, String> record : records) {
                     String key = record.key();
                     String value = record.value();
+                    if (key == null || value == null) {
+                        continue;
+                    }
                     if (value.matches("container.* is finished\\.")) {
                         removePeriodMessage(value.split(" ")[0]);
                         continue;
@@ -102,6 +107,11 @@ public class KafkaMessageUniform {
                     } else {
                         System.out.printf("unrecognized kafka key: %s\n", key);
                     }
+                }
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
             consumer.close(5, TimeUnit.SECONDS);
@@ -545,14 +555,6 @@ public class KafkaMessageUniform {
             channel.updateLog(key, timestamp, value, tags);
         }
     }
-
-    private void sendMetricToAllChannel(String metricType, Long timestamp, Double value, Map<String, String> tags) {
-        for(KafkaChannel channel: channelList) {
-            channel.updateMetric(metricType, timestamp, value, tags);
-        }
-    }
-
-
 
     private String containerIdToShortAppId(String containerId) {
         String[] parts = containerId.split("_");

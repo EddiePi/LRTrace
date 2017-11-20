@@ -24,7 +24,6 @@ public class WindowChannelTest {
     public void setUp() throws Exception {
         windowManager = WindowManager.getInstance();
         windowChannel = new WindowChannel();
-        windowManager.instantiateWindow(3, 2);
     }
 
     @Test
