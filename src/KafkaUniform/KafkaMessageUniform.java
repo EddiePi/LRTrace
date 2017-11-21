@@ -267,8 +267,7 @@ public class KafkaMessageUniform {
                         Double value = null;
                         String containerId = "";
 
-                        // we associate the name with its type
-                        name = type + ":" + name;
+
                         if (!name.equals("state")) {
                             if (valueStr.matches("^[-+]?[\\d]*(\\.\\d*)?$")) {
                                 value = Double.valueOf(valueStr);
@@ -296,6 +295,8 @@ public class KafkaMessageUniform {
                             }
                         }
                         if (value != null) {
+                            // we associate the name with its type
+                            name = type + ":" + name;
                             PackedMessage packedMessage =
                                     new PackedMessage(containerId, timestamp, name, tagMap, value == null ? 1d : value, type);
                             if (type.equals("instant")) {
@@ -347,7 +348,6 @@ public class KafkaMessageUniform {
     }
 
     private void updatePeriodMessage(PackedMessage message) {
-        System.out.printf("updating period message: %s\n", message.toString());
         int index = hasPeriodMessage(message);
         synchronized (this.periodMessagesMap) {
             List<PackedMessage> packedMessageList;

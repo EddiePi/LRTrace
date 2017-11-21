@@ -20,18 +20,19 @@ public class TsdbChannel implements KafkaChannel {
     Thread transferThread;
 
     public TsdbChannel() {
-//        conf = TracerConf.getInstance();
-//        databaseURI = conf.getStringOrDefault("tracer.tsdb.server", "localhost:4242");
-//        if (!databaseURI.matches("http://.*")) {
-//            databaseURI = "http://" + databaseURI;
-//        }
-//        if (!databaseURI.matches(".*/api/put")) {
-//            databaseURI = databaseURI + "/api/put";
-//        }
-//
-//        transferRunnable = new TransferRunnable();
-//        transferThread = new Thread(transferRunnable);
-//        transferThread.start();
+        conf = TracerConf.getInstance();
+        databaseURI = conf.getStringOrDefault("tracer.tsdb.server", "localhost:4242");
+        if (!databaseURI.matches("http://.*")) {
+            databaseURI = "http://" + databaseURI;
+        }
+        if (!databaseURI.matches(".*/api/put")) {
+            databaseURI = databaseURI + "/api/put";
+        }
+
+        transferRunnable = new TransferRunnable();
+        transferThread = new Thread(transferRunnable);
+        transferThread.start();
+        System.out.print("TSDB channel started\n");
     }
 
     private class TransferRunnable implements Runnable {
@@ -42,37 +43,61 @@ public class TsdbChannel implements KafkaChannel {
             while (isRunning) {
                 if (builder.getMetrics().size() > 0) {
                     try {
-                        String message = builder.build(true);
+                        String message;
+                        synchronized (builder) {
+                            message = builder.build(true);
+                        }
                         // TODO: maintain the connection for performance
                         String response = HTTPRequest.sendPost(databaseURI, message);
                         if (!response.matches("\\s*")) {
                             System.out.printf("Unexpected response: %s\n", response);
                         }
-                        Thread.sleep(10);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
+                }
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
 
+    /**
+     * the key has it type, either <code>instant</code> or <code>period</code>
+     * we need to take off the type before send it to opentsdb.
+     * @param key
+     * @param timestamp
+     * @param value
+     * @param tags
+     */
     @Override
     public void updateLog(String key, Long timestamp, Double value, Map<String, String> tags) {
         parseShortContainerId(tags);
-        builder.addMetric(key)
-                .setDataPoint(timestamp, value)
-                .addTags(tags);
+        String realKey;
+        String[] typeKey = key.split(":");
+        if (typeKey.length >= 2) {
+            realKey = typeKey[1];
+        } else {
+            realKey = key;
+        }
+        synchronized (builder) {
+            builder.addMetric(realKey)
+                    .setDataPoint(timestamp, value)
+                    .addTags(tags);
+        }
     }
 
     @Override
     public void updateMetric(String metricType, Long timestamp, Double value, Map<String, String> tags) {
         parseShortContainerId(tags);
-        builder.addMetric(metricType)
-                .setDataPoint(timestamp, value)
-                .addTags(tags);
+        synchronized (builder) {
+            builder.addMetric(metricType)
+                    .setDataPoint(timestamp, value)
+                    .addTags(tags);
+        }
     }
 
     private void parseShortContainerId(Map<String, String> tags) {
