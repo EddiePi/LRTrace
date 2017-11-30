@@ -17,25 +17,25 @@ public class WindowManagerTest {
     @Before
     public void setUp() throws Exception {
         wm = WindowManager.getInstance();
-//        Long timeBoundary = 10L;
-//        Integer idBoundary = 4;
-//        Random CPURandom = new Random();
-//        Random memoryRandom = new Random();
-//        for (Long time = 0L; time < timeBoundary; time++) {
-//            for (Integer id = 0; id < idBoundary; id++) {
-//                AnalysisContainer container = wm.getContainerToAssign(time, id.toString());
-//                container.CPU = CPURandom.nextGaussian();
-//                container.memory = memoryRandom.nextDouble();
-//            }
-//        }
-//        timeBoundary = 25L;
-//        for (Long time = 15L; time < timeBoundary; time++) {
-//            for (Integer id = 0; id < idBoundary; id++) {
-//                AnalysisContainer container = wm.getContainerToAssign(time, id.toString());
-//                container.CPU = CPURandom.nextGaussian();
-//                container.memory = memoryRandom.nextDouble();
-//            }
-//        }
+        Long timeBoundary = 10L;
+        Integer idBoundary = 4;
+        Random CPURandom = new Random();
+        Random memoryRandom = new Random();
+        for (Long time = 0L; time < timeBoundary; time++) {
+            for (Integer id = 0; id < idBoundary; id++) {
+                AnalysisContainer container = wm.getContainerToAssign(time, "container_" + id.toString());
+                container.CPU = CPURandom.nextGaussian();
+                container.memory = memoryRandom.nextDouble();
+            }
+        }
+        timeBoundary = 25L;
+        for (Long time = 15L; time < timeBoundary; time++) {
+            for (Integer id = 0; id < idBoundary; id++) {
+                AnalysisContainer container = wm.getContainerToAssign(time, "container_" + id.toString());
+                container.CPU = CPURandom.nextGaussian();
+                container.memory = memoryRandom.nextDouble();
+            }
+        }
     }
 
 
@@ -83,6 +83,11 @@ public class WindowManagerTest {
         System.out.print(wm.slidingWindow.size() + "\n");
         wm.loadSlidingWindow();
         System.out.print(wm.slidingWindow.size() + "\n");
+    }
+
+    @Test
+    public void storeSlidingWindowAsJson() throws Exception {
+        wm.storeSlidingWindowAsJson();
     }
 
 }

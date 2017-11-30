@@ -16,14 +16,14 @@ public class SystemMetricMonitor {
 
     Boolean isRunning = true;
     private class MonitorRunnable implements Runnable {
-        FileReader reader;
+        FileIO reader;
         List<String> contents;
         @Override
         public void run() {
             try {
             while(isRunning) {
 
-                    contents = FileReader.read("/proc/meminfo");
+                    contents = FileIO.read("/proc/meminfo");
                     for (String line: contents) {
                         if (line.contains("SwapFree")) {
                             Date now = new Date();

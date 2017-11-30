@@ -1,5 +1,7 @@
 package Server;
 
+import Utils.FileIO;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,7 +35,7 @@ public class TracerConf {
             if (!confFile.exists()) {
                 path = "../conf/tracer.conf";
             }
-            List<String> strings = Utils.FileReader.read(path);
+            List<String> strings = FileIO.read(path);
             for(String str: strings) {
                 if(str.isEmpty()) {
                     continue;
@@ -49,7 +51,7 @@ public class TracerConf {
             if (!confFile.exists()) {
                 path = "../conf/machine.conf";
             }
-            strings = Utils.FileReader.read(path);
+            strings = FileIO.read(path);
             for(String str: strings) {
                 if(str.isEmpty()) {
                     continue;

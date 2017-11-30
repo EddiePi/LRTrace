@@ -1,7 +1,5 @@
 package logAPI;
 
-import Utils.FileReader;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +23,7 @@ public abstract class AbstractLogAPI {
             return;
         }
         messageMarkList = XMLParser.parse(apiFile.getCanonicalPath());
-//        List<String> rules = FileReader.read(apiFile.getAbsolutePath());
+//        List<String> rules = FileIO.read(apiFile.getAbsolutePath());
 //        for(int i = 0; i < rules.size(); i++) {
 //            String line = rules.get(i);
 //            while(line.matches("\\s+") || line.length() == 0) {

@@ -2,15 +2,13 @@ package Utils;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
  * Created by Eddie on 2017/7/6.
  */
-public class FileReaderTest {
+public class FileIOTest {
     @Test
     public void read() throws Exception {
-        FileReader.read("conf/spark-api.xml.template");
+        FileIO.read("conf/spark-api.xml.template");
     }
 
 }

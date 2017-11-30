@@ -1,9 +1,13 @@
 package Detection;
 
 import Server.TracerConf;
+import Utils.FileIO;
 import Utils.ObjPersistent;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,6 +33,8 @@ public class WindowManager {
 
     private int windowSize = conf.getIntegerOrDefault("tracer.window.size", 3);
     private int windowInterval = conf.getIntegerOrDefault("tracer.window.interval", 2);
+
+    private transient Gson mapper = null;
 
     /**
      * this is used to synchronize the first timestamp index of the running app.
@@ -71,6 +77,7 @@ public class WindowManager {
         private void maybeStoreWindow() {
             if (slidingWindow.size() != 0) {
                 storeSlidingWindow();
+                storeSlidingWindowAsJson();
             }
         }
 
@@ -189,6 +196,29 @@ public class WindowManager {
         }
         ObjPersistent.saveObject(slidingWindow, storagePath + "/" + dataFilePrefix + existingDataFiles.toString());
         slidingWindow.clear();
+    }
+
+    public void storeSlidingWindowAsJson() {
+        File dataPath = new File(storagePath);
+        String[] files = dataPath.list();
+        Integer existingDataFiles = 0;
+        for (String file : files) {
+            if (file.matches(dataFilePrefix + "[0-9]+" + "\\.json")) {
+                existingDataFiles++;
+            }
+        }
+        String fullPath = storagePath + "/" + dataFilePrefix + existingDataFiles.toString() + ".json";
+
+        if (mapper == null) {
+            GsonBuilder builder = new GsonBuilder();
+            mapper = builder.create();
+        }
+        String resultJson = mapper.toJson(slidingWindow);
+        try {
+            FileIO.write(fullPath, resultJson);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void loadSlidingWindow() {
