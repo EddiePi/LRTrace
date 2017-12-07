@@ -22,3 +22,6 @@ tracer.system-monitor.enabled   true
 
 tracer.detection.mode           storage
 tracer.detection.data-path      /home/eddie/hookup/data
+
+tracer.window.size              3
+tracer.window.interval          2

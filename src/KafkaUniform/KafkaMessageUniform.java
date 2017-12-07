@@ -15,6 +15,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,7 +35,7 @@ public class KafkaMessageUniform {
 
     LogAPICollector collector = LogAPICollector.getInstance();
 
-    final Map<String, List<PackedMessage>> periodMessagesMap;
+    final ConcurrentMap<String, List<PackedMessage>> periodMessagesMap;
 
 
     // if a event lasts less than 1s, it might be cleared before gets sent.
@@ -43,7 +45,7 @@ public class KafkaMessageUniform {
     List<KafkaChannel> channelList;
 
     public KafkaMessageUniform() {
-        periodMessagesMap = new HashMap<>();
+        periodMessagesMap = new ConcurrentHashMap<>();
         shortEventMessageList = new LinkedList<>();
         props = new Properties();
         props.put("bootstrap.servers", conf.getStringOrDefault("tracer.kafka.bootstrap.servers", "localhost:9092"));
@@ -109,7 +111,7 @@ public class KafkaMessageUniform {
                         System.out.printf("unrecognized kafka key: %s\n", key);
                     }
                 }
-                if (System.currentTimeMillis() - 1 >= lastPeriodSendingTime) {
+                if (System.currentTimeMillis() - 1000 >= lastPeriodSendingTime) {
                     lastPeriodSendingTime = System.currentTimeMillis();
                     sendPeriodMessage();
                 }
@@ -171,7 +173,8 @@ public class KafkaMessageUniform {
     private boolean containerLogTransformer(String kafkaMessage) {
         List<PackedMessage> packedMessageList;
         packedMessageList = maybePackContainerMessage(kafkaMessage);
-
+        // TEST
+        // System.out.printf("Received container message: %s\n", kafkaMessage);
         if (packedMessageList == null) {
             return false;
         }
@@ -197,6 +200,8 @@ public class KafkaMessageUniform {
             Pattern pattern = Pattern.compile(messageMark.regex);
             Matcher matcher = pattern.matcher(logMessage);
             if (matcher.matches()) {
+
+                // TEST
                 // System.out.printf("matched log: %s\n", logMessage);
                 for (MessageMark.Group group : messageMark.groups) {
                     try {
@@ -219,6 +224,14 @@ public class KafkaMessageUniform {
                         }
                         PackedMessage packedMessage =
                                 new PackedMessage(componentId, timestamp, name, tagMap, value, type);
+                        if (!packedMessage.containerId.equals("")) {
+                            packedMessage.tagMap.put("container", packedMessage.containerId);
+                            packedMessage.tagMap.put("app", containerIdToShortAppId(packedMessage.containerId));
+                        }
+                        // TEST
+//                        if (kafkaMessage.matches(".*Finished task.*")) {
+//                            System.out.printf("finished task\n");
+//                        }
                         if (type.equals("instant")) {
                             packedMessagesList.add(packedMessage);
                         } else {
@@ -299,6 +312,10 @@ public class KafkaMessageUniform {
                             name = type + ":" + name;
                             PackedMessage packedMessage =
                                     new PackedMessage(containerId, timestamp, name, tagMap, value == null ? 1d : value, type);
+                            if (!packedMessage.containerId.equals("")) {
+                                packedMessage.tagMap.put("container", packedMessage.containerId);
+                                packedMessage.tagMap.put("app", containerIdToShortAppId(packedMessage.containerId));
+                            }
                             if (type.equals("instant")) {
                                 packedMessagesList.add(packedMessage);
                             } else {
@@ -325,12 +342,11 @@ public class KafkaMessageUniform {
         synchronized (this.periodMessagesMap) {
             for (List<PackedMessage> mList : periodMessagesMap.values()) {
                 for (PackedMessage m : mList) {
-                    m.firstSend = false;
-                    if (!m.containerId.equals("")) {
+                    m.firstSend = false;if (!m.containerId.equals("")) {
                         m.tagMap.put("container", m.containerId);
                         m.tagMap.put("app", containerIdToShortAppId(m.containerId));
                     }
-                    sendLogToAllChannel(m.name, timestamp, m.doubleValue,m.tagMap);
+                    sendLogToAllChannel(m.name, timestamp, m.doubleValue, m.tagMap);
                 }
             }
         }
@@ -349,6 +365,7 @@ public class KafkaMessageUniform {
 
     private void updatePeriodMessage(PackedMessage message) {
         int index = hasPeriodMessage(message);
+        //System.out.printf("Updating period message: %s, index: %d\n", message, index);
         synchronized (this.periodMessagesMap) {
             List<PackedMessage> packedMessageList;
             if (index < 0 && !message.isFinish) {
@@ -356,6 +373,7 @@ public class KafkaMessageUniform {
                 packedMessageList.add(message);
                 periodMessagesMap.put(message.containerId, packedMessageList);
             } else if (index >= 0 && message.isFinish) {
+                System.out.printf("receive finish mark, message: %s:\n", message);
                 PackedMessage oldMessage =
                         periodMessagesMap.get(message.containerId).remove(index);
                 if (oldMessage.firstSend) {
@@ -384,8 +402,9 @@ public class KafkaMessageUniform {
         List<PackedMessage> packedMessagesInContainer;
         if ((packedMessagesInContainer = periodMessagesMap.get(message.containerId)) != null) {
             for (int i = 0; i < packedMessagesInContainer.size(); i++)
-                if (packedMessagesInContainer.get(i).isCounterPart(message)) {
+                if (message.isCounterPart(packedMessagesInContainer.get(i))) {
                     index = i;
+                    System.out.printf("find counter part, index: %d\n", index);
                     break;
                 }
         }

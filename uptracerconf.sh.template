@@ -4,5 +4,8 @@ export TRACINGSERVER_HOME=/home/eddie/hookup
 while read LINE
 do
 	scp  ./conf/tracer.conf eddie@$LINE:$TRACINGSERVER_HOME/conf/
+        scp  ./conf/mr-api.xml eddie@$LINE:$TRACINGSERVER_HOME/conf/
+        scp  ./conf/spark-api.xml eddie@$LINE:$TRACINGSERVER_HOME/conf/
+        scp  ./conf/yarn-api.xml eddie@$LINE:$TRACINGSERVER_HOME/conf
 done < slaves
 

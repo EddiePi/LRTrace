@@ -78,6 +78,7 @@ public class WindowManager {
             if (slidingWindow.size() != 0) {
                 storeSlidingWindow();
                 storeSlidingWindowAsJson();
+                slidingWindow.clear();
             }
         }
 
@@ -195,7 +196,6 @@ public class WindowManager {
             }
         }
         ObjPersistent.saveObject(slidingWindow, storagePath + "/" + dataFilePrefix + existingDataFiles.toString());
-        slidingWindow.clear();
     }
 
     public void storeSlidingWindowAsJson() {

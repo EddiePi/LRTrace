@@ -37,7 +37,6 @@ public class KafkaLogSender {
     }
 
     public void send(String message) {
-        System.out.printf("sending kafka message. key: %s, value: %s\n", key, message);
         producer.send(new ProducerRecord<String, String>(kafkaTopic, key, message));
     }
 

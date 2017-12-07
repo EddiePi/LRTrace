@@ -39,7 +39,7 @@ public class WindowChannel implements KafkaChannel {
     public void updateLog(String key, Long timestamp, Double value, Map<String, String> tags) {
         AnalysisContainer containerToUpdate = wm.getContainerToAssign(timestamp, tags.get("container"));
         assignId(containerToUpdate, tags);
-        assignKeyedMessage(containerToUpdate, key, tags);
+        assignKeyedMessage(containerToUpdate, key, value, tags);
     }
 
     private void assignId(AnalysisContainer container, Map<String, String> tags) {
@@ -54,7 +54,7 @@ public class WindowChannel implements KafkaChannel {
         }
     }
 
-    private void assignKeyedMessage(AnalysisContainer container, String messageKey, Map<String, String> tags) {
+    private void assignKeyedMessage(AnalysisContainer container, String messageKey, Double messageValue, Map<String, String> tags) {
         KeyedMessage newMessage = new KeyedMessage();
         Map<String, List<KeyedMessage>> messageMap;
         String[] typeName = messageKey.split(":");
@@ -67,7 +67,7 @@ public class WindowChannel implements KafkaChannel {
             messageMap = container.instantMessages;
         }
         newMessage.key = typeName[1];
-
+        newMessage.value = messageValue;
         List<KeyedMessage> messageListToUpdate = messageMap.getOrDefault(typeName[1], new ArrayList<>());
         for(Map.Entry<String, String> entry: tags.entrySet()) {
             String key = entry.getKey();
