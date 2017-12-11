@@ -56,7 +56,7 @@ public class WindowChannelTest {
         }
         List<List<Map<String, AnalysisContainer>>> allWindowedData = new ArrayList<>();
         while(!windowManager.slidingWindow.isEmpty()) {
-            allWindowedData.add(windowManager.getWindowedDataForAnalysis());
+            allWindowedData.add(windowManager.getWindowedDataForAnalysis(System.currentTimeMillis() - 1000));
         }
         allWindowedData.isEmpty();
     }

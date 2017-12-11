@@ -43,7 +43,7 @@ public class WindowManagerTest {
     public void getDataForAnalysis() throws Exception {
         List<List<Map<String, AnalysisContainer>>> results = new ArrayList<>();
         for(int i = 0; i < 15; i++) {
-            results.add(wm.getWindowedDataForAnalysis());
+            results.add(wm.getWindowedDataForAnalysis(System.currentTimeMillis() - 1000));
         }
         results.isEmpty();
     }
