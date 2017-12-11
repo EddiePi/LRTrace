@@ -123,12 +123,14 @@ public class Tracer {
         dockerMonitorManager.stop();
         if(isMaster) {
             tsManager.stop();
+
+            // TEST
+            testFeedbackStop();
         }
         if (systemMonitorEnabled) {
             systemMetricMonitor.stop();
         }
 
-        // TEST
-        testFeedbackStop();
+
     }
 }
