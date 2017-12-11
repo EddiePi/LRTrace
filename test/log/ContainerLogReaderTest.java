@@ -5,7 +5,7 @@ import logAPI.MessageMark;
 import logAPI.XMLParser;
 import org.junit.Before;
 import org.junit.Test;
-import KafkaUniform.tsdb.PackedMessage;
+import kafkaSupport.tsdb.PackedMessage;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

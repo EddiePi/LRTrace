@@ -1,6 +1,6 @@
 package logAPI;
 
-import Server.TracerConf;
+import server.TracerConf;
 
 import java.io.File;
 import java.io.IOException;

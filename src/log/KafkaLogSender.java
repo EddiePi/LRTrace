@@ -1,6 +1,6 @@
 package log;
 
-import Server.TracerConf;
+import server.TracerConf;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;

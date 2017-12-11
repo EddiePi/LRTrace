@@ -2,7 +2,6 @@ package log;
 
 import logAPI.LogAPICollector;
 import logAPI.MessageMark;
-import KafkaUniform.tsdb.PackedMessage;
 
 import java.io.*;
 import java.util.*;

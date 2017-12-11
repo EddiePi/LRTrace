@@ -1,9 +1,9 @@
 package log;
 
-import Server.Tracer;
-import Server.TracerConf;
-import Utils.FileWatcher.FileActionCallback;
-import Utils.FileWatcher.WatchDir;
+import server.Tracer;
+import server.TracerConf;
+import utils.fileWatcher.FileActionCallback;
+import utils.fileWatcher.WatchDir;
 import logAPI.*;
 
 import java.io.*;
