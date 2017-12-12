@@ -90,7 +90,7 @@ public class Tracer {
      * this class is for test only.
      */
     private void testFeedbackInit() {
-        testFeedback = new TestFeedback("test", 5000);
+        testFeedback = new TestFeedback("test", 1000);
     }
 
     private void testFeedbackStop() {

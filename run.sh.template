@@ -9,6 +9,6 @@ LIBPATH=../lib/
 
 cd /home/eddie/hookup/out
 rm tracer.log
-setsid java -Djava.ext.dirs=./:$LIBPATH -Dlog4j-configuration=log4j.properties Server.TracingMaster > tracer.log 2>&1 &
-#setsid java -Djava.ext.dirs=./:$LIBPATH -Dlog4j-configuration=log4j.properties Server.TracingMaster &
+setsid java -Djava.ext.dirs=./:$LIBPATH -Dlog4j-configuration=log4j.properties server.TracingMaster > tracer.log 2>&1 &
+#setsid java -Djava.ext.dirs=./:$LIBPATH -Dlog4j-configuration=log4j.properties server.TracingMaster &
 

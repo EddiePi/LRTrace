@@ -40,7 +40,7 @@ public class WindowManager {
      * this is used to synchronize the first timestamp index of the running app.
      */
     private Boolean firstData = true;
-    private Long currentStartTimestamp;
+    private Long currentStartTimestamp = 0L;
 
     private SelfCheckingRunnable selfCheckingRunnable = new SelfCheckingRunnable();
     private Thread selfCheckingThread = new Thread(selfCheckingRunnable);
@@ -101,11 +101,62 @@ public class WindowManager {
 
 
     /**
+     * this method returns the <code>AnalysisContainer</code>.
+     * other class will assign this container.
+     * if the requested container is not in the sliding window, we create it.
+     * @param timestamp
+     * @param containerId
+     * @return
+     */
+    public AnalysisContainer getContainerToAssign(Long timestamp, String containerId) {
+
+        if (timestamp.toString().length() > 10) {
+            timestamp /= 1000;
+        }
+
+        if (firstData && !hasMoreData()) {
+            synchronized (this.firstData) {
+                currentStartTimestamp = timestamp;
+                firstData = false;
+            }
+        }
+        selfCheckingRunnable.resetCount();
+
+        // TEST
+        // System.out.printf("updating container: %s, time: %d\n", containerId, timestamp);
+
+        // If the incoming data is out of date, we do not create it in the sliding window.
+        if (timestamp < currentStartTimestamp) {
+            return null;
+        }
+
+        Map<String, AnalysisContainer> timestampMap = slidingWindow.get(timestamp);
+        if (timestampMap == null) {
+            timestampMap = new HashMap<>();
+            slidingWindow.put(timestamp, timestampMap);
+        }
+        assert (timestampMap != null);
+        AnalysisContainer container = timestampMap.get(containerId);
+        if (container == null) {
+            container = new AnalysisContainer();
+            container.setTimestamp(timestamp);
+            container.setContainerId(containerId);
+            timestampMap.put(containerId, container);
+        }
+
+        return container;
+    }
+
+
+    /**
      * this function returns a <code>list</code> of container in the current window.
      * this. data in one window is raw. function is used to analysis.
      * @return
      */
     public List<Map<String, AnalysisContainer>> getWindowedDataForAnalysis(Long timestampUpperBound) {
+        if (timestampUpperBound.toString().length() > 10) {
+            timestampUpperBound /= 1000;
+        }
         List<Map<String, AnalysisContainer>> dataForAnalysis = new ArrayList<>();
         int size = Math.min(windowSize, slidingWindow.size());
         for(int i = 0; i < size; i++) {
@@ -141,51 +192,6 @@ public class WindowManager {
 
         return dataForAnalysis;
     }
-
-    /**
-     * this method returns the <code>AnalysisContainer</code>.
-     * other class will assign this container.
-     * if the requested container is not in the sliding window, we create it.
-     * @param timestamp
-     * @param containerId
-     * @return
-     */
-    public AnalysisContainer getContainerToAssign(Long timestamp, String containerId) {
-
-        if (timestamp.toString().length() > 10) {
-            timestamp /= 1000;
-        }
-
-        if (firstData && !hasMoreData()) {
-            synchronized (this.firstData) {
-                currentStartTimestamp = timestamp;
-                firstData = false;
-            }
-        }
-        selfCheckingRunnable.resetCount();
-
-        // If the incoming data is out of date, we do not create it in the sliding window.
-        if (timestamp < currentStartTimestamp) {
-            return null;
-        }
-
-        Map<String, AnalysisContainer> timestampMap = slidingWindow.get(timestamp);
-        if (timestampMap == null) {
-            timestampMap = new HashMap<>();
-            slidingWindow.put(timestamp, timestampMap);
-        }
-        assert (timestampMap != null);
-        AnalysisContainer container = timestampMap.get(containerId);
-        if (container == null) {
-            container = new AnalysisContainer();
-            container.setTimestamp(timestamp);
-            container.setContainerId(containerId);
-            timestampMap.put(containerId, container);
-        }
-
-        return container;
-    }
-
 
     /**
      * this should be called by other class

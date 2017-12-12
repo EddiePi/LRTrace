@@ -22,7 +22,14 @@ public class WindowChannel implements KafkaChannel {
 
     @Override
     public void updateMetric(String metricType, Long timestamp, Double value, Map<String, String> tags) {
-        AnalysisContainer containerToUpdate = wm.getContainerToAssign(timestamp, tags.get("container"));
+        String containerId = tags.get("container");
+        if (containerId == null || containerId.equals("null")) {
+            return;
+        }
+        AnalysisContainer containerToUpdate = wm.getContainerToAssign(timestamp, containerId);
+        if (containerToUpdate == null) {
+            return;
+        }
         assignId(containerToUpdate, tags);
         switch (metricType) {
             case "cpu": containerToUpdate.CPU = value; break;
@@ -37,7 +44,14 @@ public class WindowChannel implements KafkaChannel {
 
     @Override
     public void updateLog(String key, Long timestamp, Double value, Map<String, String> tags) {
-        AnalysisContainer containerToUpdate = wm.getContainerToAssign(timestamp, tags.get("container"));
+        String containerId = tags.get("container");
+        if (containerId == null || containerId.equals("null")) {
+            return;
+        }
+        AnalysisContainer containerToUpdate = wm.getContainerToAssign(timestamp, containerId);
+        if (containerToUpdate == null) {
+            return;
+        }
         assignId(containerToUpdate, tags);
         assignKeyedMessage(containerToUpdate, key, value, tags);
     }
@@ -46,10 +60,14 @@ public class WindowChannel implements KafkaChannel {
         for(Map.Entry<String, String> entry: tags.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            if (key.equals("container")) {
-                container.setContainerId(value);
-            } else if (key.equals("app")) {
-                container.setAppId(value);
+            if (key != null && value != null) {
+                if (key.equals("container")) {
+                    System.out.printf("container id: %s\n", value);
+                    container.setContainerId(value);
+                } else if (key.equals("app")) {
+                    System.out.printf("app id: %s\n", value);
+                    container.setAppId(value);
+                }
             }
         }
     }

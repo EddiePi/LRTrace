@@ -22,6 +22,7 @@ public abstract class AbstractFeedback implements Runnable {
 
     public AbstractFeedback(String name, Integer interval) {
         this.feedbackInterval = interval;
+        this.name = name;
         isRunning = true;
 
         feedbackManager.registerFeedback(this);
@@ -30,7 +31,7 @@ public abstract class AbstractFeedback implements Runnable {
     @Override
     public void run() {
         while(isRunning) {
-            dataList = windowManager.getWindowedDataForAnalysis(System.currentTimeMillis() - 2000);
+            dataList = windowManager.getWindowedDataForAnalysis(System.currentTimeMillis() - 1000);
             action(dataList);
             try {
                 Thread.sleep(feedbackInterval);
