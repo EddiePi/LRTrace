@@ -14,8 +14,8 @@ public abstract class AbstractFeedback implements Runnable {
     FeedbackManager feedbackManager = FeedbackManager.getInstance();
 
     public String name;
-    private Integer feedbackInterval;
-    private Boolean isRunning;
+    protected Integer feedbackInterval;
+    protected Boolean isRunning;
     // the structure of the list: List -> each window -> containers in the window.
     // all data are raw and the list should be cleared by the UDF.
     protected List<Map<String, AnalysisContainer>> dataList;
@@ -24,8 +24,6 @@ public abstract class AbstractFeedback implements Runnable {
         this.feedbackInterval = interval;
         this.name = name;
         isRunning = true;
-
-        feedbackManager.registerFeedback(this);
     }
 
     @Override
@@ -43,7 +41,6 @@ public abstract class AbstractFeedback implements Runnable {
 
     public void stop() {
         isRunning = false;
-        feedbackManager.unregisterFeedback(name);
     }
 
     public abstract void action(List<Map<String, AnalysisContainer>> data);
