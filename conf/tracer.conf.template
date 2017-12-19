@@ -25,3 +25,5 @@ tracer.detection.data-path      /home/eddie/hookup/data
 
 tracer.window.size              3
 tracer.window.interval          2
+
+tracer.feedback.paths           /Users/Eddie/gitRepo/hookup-plugins/out/artifacts/test-plugin.jar:TestPlugin:1000
