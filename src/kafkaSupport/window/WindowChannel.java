@@ -6,6 +6,7 @@ import detection.WindowManager;
 import kafkaSupport.KafkaChannel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,9 +45,15 @@ public class WindowChannel implements KafkaChannel {
 
     @Override
     public void updateLog(String key, Long timestamp, Double value, Map<String, String> tags) {
-        String containerId = tags.get("container");
+        HashMap<String, String> newMap = new HashMap<>(tags);
+        String containerId = newMap.get("container");
         if (containerId == null || containerId.equals("null")) {
-            return;
+            String appId = newMap.get("app");
+            if (appId != null) {
+                newMap.put("container", appId);
+            } else {
+                return;
+            }
         }
         AnalysisContainer containerToUpdate = wm.getContainerToAssign(timestamp, containerId);
         if (containerToUpdate == null) {

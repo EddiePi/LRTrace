@@ -24,7 +24,7 @@
             <value>1</value>
         </group>
     </rule>
-    <!--rule>
+    <rule>
         <regex>.*(?&lt;app&gt;application_[0-9]+_[0-9]+) State change from.*to (?&lt;state&gt;.*)</regex>
         <dateOffset>0</dateOffset>
         <group>
@@ -35,7 +35,7 @@
             <isFinish>false</isFinish>
             <value>1</value>
         </group>
-    </rule-->
+    </rule>
     <rule>
         <regex>.*(?&lt;appAttempt&gt;appattempt_[0-9]+_[0-9]+_[0-9]+).*State change from.*to (?&lt;state&gt;.*)</regex>
         <dateOffset>0</dateOffset>
