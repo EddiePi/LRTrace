@@ -26,6 +26,13 @@ public class ShellCommandExecutor {
             while ((line = br.readLine()) != null) {
                 resultBuffer.append(line).append("\n");
             }
+
+            BufferedReader brError = new BufferedReader(new InputStreamReader(ps.getErrorStream(), "gb2312"));
+            String errLine;
+            while((errLine = brError.readLine()) != null) {
+                System.out.println(errLine);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -34,6 +41,11 @@ public class ShellCommandExecutor {
     }
 
     public String getOutput() {
-        return (resultBuffer == null) ? "" : resultBuffer.toString();
+        String result = "";
+        if (resultBuffer != null) {
+            result = resultBuffer.toString();
+        }
+        resultBuffer = null;
+        return result;
     }
 }
