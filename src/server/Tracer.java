@@ -1,5 +1,6 @@
 package server;
 
+import feedback.FeedbackLoader;
 import feedback.FeedbackManager;
 import feedback.TestFeedback;
 import utils.SystemMetricMonitor;
@@ -82,7 +83,9 @@ public class Tracer {
             tsManager.start();
 
             // TEST
-            testFeedbackInit();
+            // testFeedbackInit();
+            FeedbackLoader feedbackLoader = new FeedbackLoader();
+            feedbackLoader.load();
         }
     }
 
@@ -125,7 +128,7 @@ public class Tracer {
             tsManager.stop();
 
             // TEST
-            testFeedbackStop();
+            // testFeedbackStop();
         }
         if (systemMonitorEnabled) {
             systemMetricMonitor.stop();

@@ -61,11 +61,11 @@ public class PackedMessage implements Serializable {
     public boolean isCounterPart(PackedMessage other) {
         boolean res;
         res = containerId.equals(other.containerId) && name.equals(other.name) && tagMap.equals(other.tagMap);
-        if (name.equals("period:task") && isFinish) {
-            System.out.printf("this id: %s, other id: %s\n", containerId, other.containerId);
-            System.out.printf("this name: %s, other name: %s\n", name, other.name);
-            System.out.printf("this tag: %s, other tag: %s\n", tagMap, other.tagMap);
-        }
+//        if (name.equals("period:task") && isFinish) {
+//            System.out.printf("this id: %s, other id: %s\n", containerId, other.containerId);
+//            System.out.printf("this name: %s, other name: %s\n", name, other.name);
+//            System.out.printf("this tag: %s, other tag: %s\n", tagMap, other.tagMap);
+//        }
         return res;
     }
 }

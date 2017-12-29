@@ -51,6 +51,7 @@ public class WindowChannel implements KafkaChannel {
             String appId = newMap.get("app");
             if (appId != null) {
                 newMap.put("container", appId);
+                containerId = appId;
             } else {
                 return;
             }
@@ -69,10 +70,8 @@ public class WindowChannel implements KafkaChannel {
             String value = entry.getValue();
             if (key != null && value != null) {
                 if (key.equals("container")) {
-                    System.out.printf("container id: %s\n", value);
                     container.setContainerId(value);
                 } else if (key.equals("app")) {
-                    System.out.printf("app id: %s\n", value);
                     container.setAppId(value);
                 }
             }

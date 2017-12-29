@@ -12,7 +12,8 @@ public class ShellCommandExecutorTest {
     ShellCommandExecutor executor;
     @Before
     public void setUp() throws Exception {
-        String command = "/home/eddie/hadoop-2.7.3/bin/yarn queue -status alpha";
+        String command = "/home/eddie/hookup/script/move-app-to-queue.sh application_1 alpha";
+        //String command = "/home/eddie/hookup/script/test.sh";
         executor = new ShellCommandExecutor(command);
     }
 
@@ -20,8 +21,7 @@ public class ShellCommandExecutorTest {
     public void execute() throws Exception {
         executor.execute();
         String result = executor.getOutput();
-        String[] lines = result.split("\\n");
-        System.out.print(lines[4].trim());
+        System.out.print(result);
     }
 
 }

@@ -77,7 +77,7 @@ public class TsdbChannel implements KafkaChannel {
     @Override
     public void updateLog(String key, Long timestamp, Double value, Map<String, String> tags) {
         Map<String, String> tsdbTags;
-        tsdbTags = parseShortContainerId(tags);
+        tsdbTags = parseShortId(tags);
         String realKey;
         String[] typeKey = key.split(":");
         if (typeKey.length >= 2) {
@@ -95,7 +95,7 @@ public class TsdbChannel implements KafkaChannel {
     @Override
     public void updateMetric(String metricType, Long timestamp, Double value, Map<String, String> tags) {
         Map<String, String> tsdbTags;
-        tsdbTags = parseShortContainerId(tags);
+        tsdbTags = parseShortId(tags);
         synchronized (builder) {
             builder.addMetric(metricType)
                     .setDataPoint(timestamp, value)
@@ -103,16 +103,20 @@ public class TsdbChannel implements KafkaChannel {
         }
     }
 
-    private Map<String, String> parseShortContainerId(Map<String, String> tags) {
+    private Map<String, String> parseShortId(Map<String, String> tags) {
         Map<String, String> newTags = new HashMap<>(tags);
         String longContainerId = tags.get("container");
-        if (longContainerId == null) {
-             return newTags;
+        if (longContainerId != null) {
+            String[] parts = longContainerId.split("_");
+            String shortId = parts[parts.length - 2] + "_" + parts[parts.length - 1];
+            newTags.put("container", shortId);
         }
-        String[] parts = longContainerId.split("_");
-        String shortId = parts[parts.length - 2] + "_" + parts[parts.length - 1];
-        newTags.put("container", shortId);
-
+        String appId = tags.get("app");
+        if (appId != null) {
+            String[] parts = appId.split("_");
+            String shortId = parts[1] + "_" + parts[2];
+            newTags.put("app", shortId);
+        }
         return newTags;
     }
 }
