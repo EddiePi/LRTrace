@@ -9,21 +9,29 @@ import java.util.concurrent.TimeUnit;
  * Created by Eddie on 2017/2/15.
  */
 public class ShellCommandExecutor {
-    String[] command;
+    String[] commands;
+    String command;
+    boolean multi;
     StringBuffer resultBuffer = null;
 
     public ShellCommandExecutor(String command) {
-        this.command = new String[1];
-        this.command[0]= command;
+        this.command= command;
+        multi = false;
     }
 
     public ShellCommandExecutor(String[] commands) {
-        this.command = commands;
+        this.commands = commands;
+        multi = true;
     }
 
     public void execute() throws IOException {
         try {
-            Process ps = Runtime.getRuntime().exec(command);
+            Process ps;
+            if (multi) {
+                ps = Runtime.getRuntime().exec(commands);
+            } else {
+                ps = Runtime.getRuntime().exec(command);
+            }
             int exitCode = ps.waitFor();
             if (exitCode != 0) {
                 System.out.printf("shell failed. exit code: %d\n", exitCode);
