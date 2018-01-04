@@ -11,26 +11,37 @@ import java.util.concurrent.TimeUnit;
 public class ShellCommandExecutor {
     String[] commands;
     String command;
+    String[] envp;
     boolean multi;
     StringBuffer resultBuffer = null;
 
     public ShellCommandExecutor(String command) {
-        this.command= command;
-        multi = false;
+        this(command, null);
     }
 
     public ShellCommandExecutor(String[] commands) {
+        this(commands, null);
+    }
+
+    public ShellCommandExecutor(String command, String[] envp) {
+        this.command = command;
+        multi = false;
+        this.envp = envp;
+    }
+
+    public ShellCommandExecutor(String[] commands, String[] envp) {
         this.commands = commands;
         multi = true;
+        this.envp = envp;
     }
 
     public void execute() throws IOException {
         try {
             Process ps;
             if (multi) {
-                ps = Runtime.getRuntime().exec(commands);
+                ps = Runtime.getRuntime().exec(commands, envp);
             } else {
-                ps = Runtime.getRuntime().exec(command);
+                ps = Runtime.getRuntime().exec(command, envp);
             }
             int exitCode = ps.waitFor();
             if (exitCode != 0) {
