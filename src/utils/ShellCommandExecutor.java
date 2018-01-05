@@ -43,10 +43,7 @@ public class ShellCommandExecutor {
             } else {
                 ps = Runtime.getRuntime().exec(command, envp);
             }
-            int exitCode = ps.waitFor();
-            if (exitCode != 0) {
-                System.out.printf("shell failed. exit code: %d\n", exitCode);
-            }
+
 
             BufferedReader br = new BufferedReader(new InputStreamReader(ps.getInputStream()));
             resultBuffer = new StringBuffer();
@@ -59,6 +56,10 @@ public class ShellCommandExecutor {
             String errLine;
             while((errLine = brError.readLine()) != null) {
                 System.out.println(errLine);
+            }
+            int exitCode = ps.waitFor();
+            if (exitCode != 0) {
+                System.out.printf("shell failed. exit code: %d\n", exitCode);
             }
 
         } catch (IOException e) {
