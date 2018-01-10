@@ -27,3 +27,6 @@ tracer.window.size              3
 tracer.window.interval          2
 
 tracer.feedback.paths           /Users/Eddie/gitRepo/hookup-plugins/out/artifacts/test-plugin.jar:TestPlugin:1000
+
+tracer.hadoop-home              /home/eddie/hadoop-2.7.3
+tracer.script-home              /home/eddie/hookup/script
