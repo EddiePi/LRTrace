@@ -291,7 +291,8 @@ public class KafkaMessageUniform {
                         }
                         Map<String, String> tagMap = new HashMap<>();
                         for (String tagName : group.tags) {
-                            String tagValue = matcher.group(tagName).replaceAll("\\s|#", "_");
+                            String rawValue = matcher.group(tagName);
+                            String tagValue = rawValue.replaceAll("\\s|#", "_");
                             if (tagName.equals("container")) {
                                 containerId = tagValue;
                             } else if (!tagName.equals("state")) {
@@ -299,9 +300,10 @@ public class KafkaMessageUniform {
                             }
                             // if we the metric name is 'state', we must have a tag also named 'state'.
                             if (name.equals("state") && tagName.equals("state")) {
-                                Integer stateIntValue = StateCollection.containerStateMap.get(tagValue.split("_")[0]);
+                                rawValue = rawValue.split("\\s+")[0];
+                                Integer stateIntValue = StateCollection.containerStateMap.get(rawValue);
                                 if (stateIntValue == null) {
-                                    System.out.printf("unrecognized container state:%s\n", tagValue);
+                                    System.out.printf("unrecognized container state:%s\n", rawValue);
                                     continue;
                                 }
                                 value = (double) stateIntValue;
@@ -446,28 +448,30 @@ public class KafkaMessageUniform {
                         }
                         Map<String, String> tagMap = new HashMap<>();
                         for (String tagName : group.tags) {
-                            String tagValue = matcher.group(tagName).replaceAll("\\s|#", "_");
+                            String rawValue = matcher.group(tagName);
+                            String tagValue = rawValue.replaceAll("\\s|#", "_");
+
                             // if the metric's name is 'state', we must have a tag also named 'state'.
                             if (tagName.equals("state")) {
-                                tagValue = tagValue.split("_")[0];
+                                rawValue = rawValue.split("\\s+")[0];
                                 if (name.equals("app.state")) {
-                                    Integer stateIntValue = StateCollection.RMAppState.get(tagValue);
+                                    Integer stateIntValue = StateCollection.RMAppState.get(rawValue);
                                     if (stateIntValue == null) {
-                                        System.out.printf("unrecognized app state:%s\n", tagValue);
+                                        System.out.printf("unrecognized app state:%s\n", rawValue);
                                         continue;
                                     }
                                     value = (double) stateIntValue;
                                 } else if (name.equals("app.attempt.state")) {
-                                    Integer stateIntValue = StateCollection.RMAppAttemptStateMap.get(tagValue);
+                                    Integer stateIntValue = StateCollection.RMAppAttemptStateMap.get(rawValue);
                                     if (stateIntValue == null) {
-                                        System.out.printf("unrecognized appattemp state:%s\n", tagValue);
+                                        System.out.printf("unrecognized appattemp state:%s\n", rawValue);
                                         continue;
                                     }
                                     value = (double) stateIntValue;
                                 } else if (name.equals("rm.container.state")) {
-                                    Integer stateIntValue = StateCollection.RMContainerState.get(tagValue);
+                                    Integer stateIntValue = StateCollection.RMContainerState.get(rawValue);
                                     if (stateIntValue == null) {
-                                        System.out.printf("unrecognized container state:%s\n", tagValue);
+                                        System.out.printf("unrecognized container state:%s\n", rawValue);
                                         continue;
                                     }
                                     value = (double) stateIntValue;
