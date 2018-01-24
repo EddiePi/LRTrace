@@ -299,7 +299,7 @@ public class KafkaMessageUniform {
                             }
                             // if we the metric name is 'state', we must have a tag also named 'state'.
                             if (name.equals("state") && tagName.equals("state")) {
-                                Integer stateIntValue = StateCollection.containerStateMap.get(tagValue);
+                                Integer stateIntValue = StateCollection.containerStateMap.get(tagValue.split("_")[0]);
                                 if (stateIntValue == null) {
                                     System.out.printf("unrecognized container state:%s\n", tagValue);
                                     continue;
@@ -449,6 +449,7 @@ public class KafkaMessageUniform {
                             String tagValue = matcher.group(tagName).replaceAll("\\s|#", "_");
                             // if the metric's name is 'state', we must have a tag also named 'state'.
                             if (tagName.equals("state")) {
+                                tagValue = tagValue.split("_")[0];
                                 if (name.equals("app.state")) {
                                     Integer stateIntValue = StateCollection.RMAppState.get(tagValue);
                                     if (stateIntValue == null) {

@@ -308,7 +308,12 @@ public class LogReaderManager {
 
     public static Long parseTimestamp(String logMessage) {
         String[] words = logMessage.split("\\s+");
-        Long timestamp = Timestamp.valueOf(words[0].replace('/', '-') + " " + words[1].replace(',', '.')).getTime();
+        words[0] = words[0].replace('/', '-');
+        String year = words[0].split("-")[0];
+        if (year.length() < 4) {
+            words[0] = "20" + words[0];
+        }
+        Long timestamp = Timestamp.valueOf(words[0] + " " + words[1].replace(',', '.')).getTime();
         return timestamp;
     }
 
