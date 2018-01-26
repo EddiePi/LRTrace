@@ -31,10 +31,12 @@ public class WindowManager {
     //public for test
     public Map<Long, Map<String, AnalysisContainer>> slidingWindow;
 
-    private int windowSize = conf.getIntegerOrDefault("tracer.window.size", 3);
-    private int windowInterval = conf.getIntegerOrDefault("tracer.window.interval", 2);
+    private int windowSize;
+    private int windowInterval;
 
     private transient Gson mapper = null;
+
+    private boolean isMSResolution = conf.getBooleanOrDefault("tracer.docker.ms-resolution", false);
 
     /**
      * this is used to synchronize the first timestamp index of the running app.
@@ -48,6 +50,7 @@ public class WindowManager {
     // one of 'storage', 'training', 'detection'
     private String mode = conf.getStringOrDefault("tracer.detection.mode", "detection");
     private String storagePath = conf.getStringOrDefault("tracer.detection.data-path", "./data");
+
     private String dataFilePrefix = "sliding_window";
 
     private class SelfCheckingRunnable implements Runnable {
@@ -88,6 +91,12 @@ public class WindowManager {
     }
 
     private WindowManager() {
+        windowSize = conf.getIntegerOrDefault("tracer.window.size", 1000);
+        windowInterval = conf.getIntegerOrDefault("tracer.window.interval", windowSize);
+        if (!isMSResolution && windowSize < 1000) {
+            windowInterval = 1000;
+            windowSize = 1000;
+        }
         if (windowInterval > windowSize) {
             windowInterval = windowSize;
         }
@@ -111,7 +120,8 @@ public class WindowManager {
     public AnalysisContainer getContainerToAssign(Long timestamp, String containerId) {
 
         if (timestamp.toString().length() > 10) {
-            timestamp /= 1000;
+            timestamp /= windowSize;
+            timestamp *= windowSize;
         }
 
         if (firstData && !hasMoreData()) {
@@ -155,7 +165,8 @@ public class WindowManager {
      */
     public List<Map<String, AnalysisContainer>> getWindowedDataForAnalysis(Long timestampUpperBound) {
         if (timestampUpperBound.toString().length() > 10) {
-            timestampUpperBound /= 1000;
+            timestampUpperBound /= windowSize;
+            timestampUpperBound *= windowSize;
         }
         List<Map<String, AnalysisContainer>> dataForAnalysis = new ArrayList<>();
         int size = Math.min(windowSize, slidingWindow.size());
