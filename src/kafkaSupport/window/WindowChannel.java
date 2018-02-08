@@ -46,6 +46,8 @@ public class WindowChannel implements KafkaChannel {
 
     @Override
     public void updateLog(String key, Long timestamp, Double value, Map<String, String> tags) {
+        // TEST
+        // System.out.printf("key: %s, value: %f, tags:%s\n", key, value, tags.toString());
         HashMap<String, String> newMap = new HashMap<>(tags);
         String containerId = newMap.get("container");
         if (containerId == null || containerId.equals("null")) {
@@ -53,6 +55,7 @@ public class WindowChannel implements KafkaChannel {
             if (appId != null) {
                 newMap.put("container", appId);
                 containerId = appId;
+
             } else {
                 return;
             }
@@ -63,7 +66,11 @@ public class WindowChannel implements KafkaChannel {
         }
         assignId(containerToUpdate, tags);
         assignKeyedMessage(containerToUpdate, key, value, tags);
-        if (key.equals("app.state") && Double.compare(value,7.0) > 0) {
+        // TEST
+//        if (containerId.matches("app.*")) {
+//            System.out.printf("key: %s, value %f\n", key, value);
+//        }
+        if (key.equals("instant:app.state") && Double.compare(value, 6.5) > 0) {
             wm.registerFinishedApp(newMap.get("app"));
         }
     }

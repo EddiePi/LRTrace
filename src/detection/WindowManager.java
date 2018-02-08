@@ -41,6 +41,7 @@ public class WindowManager {
     private boolean groupByTime;
 
     private ConcurrentSet<String> appsInFinishState = new ConcurrentSet<>();
+    private ConcurrentSet<String> finishedApp = new ConcurrentSet<>();
 
     private int windowSize;
     private int windowInterval;
@@ -157,11 +158,11 @@ public class WindowManager {
      * @return
      */
     public AnalysisContainer getContainerToAssign(Long timestamp, String containerId) {
+        if (timestamp.toString().length() > 10) {
+            timestamp /= windowSize;
+            timestamp *= windowSize;
+        }
         if (groupByTime) {
-            if (timestamp.toString().length() > 10) {
-                timestamp /= windowSize;
-                timestamp *= windowSize;
-            }
 
             if (firstData && !hasMoreData()) {
                 synchronized (this.firstData) {
@@ -206,17 +207,20 @@ public class WindowManager {
             }
             Map<Long, Map<String, AnalysisContainer>> appMap = appSlidingWindow.get(appId);
             if (appMap == null) {
-                appMap = new HashMap<>();
+                appMap = new LinkedHashMap<>();
                 appSlidingWindow.put(appId, appMap);
             }
-            assert (appMap != null);
             Map<String, AnalysisContainer> containerMap = appMap.get(timestamp);
             if (containerMap == null) {
                 containerMap = new HashMap<>();
-                containerMap.put(containerId, new AnalysisContainer());
                 appMap.put(timestamp, containerMap);
             }
             AnalysisContainer container = containerMap.get(containerId);
+            if (container == null) {
+                container = new AnalysisContainer();
+                containerMap.put(containerId, new AnalysisContainer());
+            }
+            assert(container != null);
             return container;
         }
     }
@@ -269,9 +273,12 @@ public class WindowManager {
     }
 
     public void registerFinishedApp(String appId) {
-        synchronized (this.appsInFinishState) {
-            appsInFinishState.add(appId);
-            appWindowSizeMap.put(appId, appSlidingWindow.get(appId).size());
+        if (!finishedApp.contains(appId)) {
+            synchronized (this.appsInFinishState) {
+                appsInFinishState.add(appId);
+                appWindowSizeMap.put(appId, 0);
+            }
+            finishedApp.add(appId);
         }
     }
 
@@ -317,9 +324,13 @@ public class WindowManager {
         Set<String> appToStore = new HashSet<>();
         for (Map.Entry<String, Integer> entry: appWindowSizeMap.entrySet()) {
             String appId = entry.getKey();
-            if (entry.getValue() == appSlidingWindow.get(appId).size()) {
+            int previousSize = entry.getValue();
+            int currentSize = appSlidingWindow.get(appId).size();
+            if (previousSize == currentSize) {
                 System.out.printf("new app to store: %s\n", appId);
                 appToStore.add(appId);
+            } else {
+                entry.setValue(currentSize);
             }
         }
         for (String appToRemove: appToStore) {
@@ -332,7 +343,7 @@ public class WindowManager {
             mapper = builder.create();
         }
         for (String appId: appToStore) {
-            oneAppWindow = new HashMap<>(appSlidingWindow.get(appId));
+            oneAppWindow = new LinkedHashMap<>(appSlidingWindow.get(appId));
             String resultJson = mapper.toJson(oneAppWindow);
             String fullPath = storagePath + "/" + appId + ".json";
             try {
