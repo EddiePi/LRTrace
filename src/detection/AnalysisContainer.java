@@ -52,9 +52,7 @@ public class AnalysisContainer implements Serializable {
     }
 
     public void setTimestamp(Long timestamp) {
-        if(timestamp.toString().length() > 10) {
-            timestamp /= 1000;
-        }
+
         this.timestamp = timestamp;
     }
 }

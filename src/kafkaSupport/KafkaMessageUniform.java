@@ -67,7 +67,9 @@ public class KafkaMessageUniform {
 
     private void initAllChannel() {
         channelList = new ArrayList<>();
-        String[] confArr = conf.getStringOrDefault("tracer.channels", "tsdb, window").toLowerCase().split(",");
+        String allChannelStr = conf.getStringOrDefault("tracer.channels", "tsdb, window");
+        String[] confArr = allChannelStr.toLowerCase().split(",");
+
         for (String channel: confArr) {
             switch (channel.trim()) {
                 case "tsdb": channelList.add(new TsdbChannel());break;

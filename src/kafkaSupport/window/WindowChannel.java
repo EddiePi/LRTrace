@@ -19,6 +19,7 @@ public class WindowChannel implements KafkaChannel {
 
     public WindowChannel() {
         wm = WindowManager.getInstance();
+        System.out.print("Window channel started\n");
     }
 
     @Override

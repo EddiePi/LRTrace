@@ -43,8 +43,13 @@ public class TracerConf {
                 if (str.trim().charAt(0) == '#') {
                     continue;
                 }
-                String[] result = str.split("\\s+");
-                setting.put(result[0], result[1]);
+                String[] result = str.trim().split("\\s+");
+                System.out.print("\n");
+                String value = "";
+                for (int i = 1; i < result.length; i++) {
+                    value = value + " " + result[i];
+                }
+                setting.put(result[0], value.trim());
             }
             path = "conf/machine.conf";
             confFile = new File(path);

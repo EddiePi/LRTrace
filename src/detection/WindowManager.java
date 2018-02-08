@@ -36,7 +36,7 @@ public class WindowManager {
 
     private transient Gson mapper = null;
 
-    private boolean isMSResolution = conf.getBooleanOrDefault("tracer.docker.ms-resolution", false);
+    private boolean isMSResolution = conf.getBooleanOrDefault("tracer.docker.monitor.ms-resolution", false);
 
     /**
      * this is used to synchronize the first timestamp index of the running app.
@@ -60,7 +60,9 @@ public class WindowManager {
 
         @Override
         public void run() {
+            //System.out.printf("self checking thread started.");
             while(isChecking) {
+                //System.out.printf("idle count: %d\n", idleCount.get());
                 if((mode.equals("detection") && !hasMoreData() || mode.equals("storage")) &&
                         idleCount.get() < 3) {
                     idleCount.incrementAndGet();
@@ -78,6 +80,8 @@ public class WindowManager {
         }
 
         private void maybeStoreWindow() {
+            // TEST
+            //System.out.printf("maybe store window. Window size: %d\n", slidingWindow.size());
             if (slidingWindow.size() != 0) {
                 storeSlidingWindow();
                 storeSlidingWindowAsJson();
@@ -106,6 +110,7 @@ public class WindowManager {
         if (mode.equals("training")) {
             loadSlidingWindow();
         }
+        System.out.printf("window manager started. window size: %d\n", windowSize);
     }
 
 

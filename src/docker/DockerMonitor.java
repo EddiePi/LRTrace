@@ -121,7 +121,7 @@ class DockerMonitor {
                     if(dockerId.contains("Error") || dockerId.length() == 0) {
                         sendZeroMetrics();
                         maxRetry++;
-                        if (maxRetry >= 10) {
+                        if (maxRetry >= 10 * 1000 / monitorInterval) {
                             System.out.print("no docker started after 10 retry. abandon monitoring the docker\n");
                             isRunning = false;
                             manager.removeDockerMonitor(containerId);
