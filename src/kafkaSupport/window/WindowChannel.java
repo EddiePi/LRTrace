@@ -63,6 +63,9 @@ public class WindowChannel implements KafkaChannel {
         }
         assignId(containerToUpdate, tags);
         assignKeyedMessage(containerToUpdate, key, value, tags);
+        if (key.equals("app.state") && Double.compare(value,7.0) > 0) {
+            wm.registerFinishedApp(newMap.get("app"));
+        }
     }
 
     private void assignId(AnalysisContainer container, Map<String, String> tags) {

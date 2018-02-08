@@ -25,6 +25,8 @@ tracer.detection.data-path      /home/eddie/hookup/data
 
 tracer.window.size              3
 tracer.window.interval          2
+#group-by either 'time' or 'app', default is time
+tracer.window.group-by          time
 
 tracer.feedback.paths           /Users/Eddie/gitRepo/hookup-plugins/out/artifacts/test-plugin.jar:TestPlugin:1000
 

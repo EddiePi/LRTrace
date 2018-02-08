@@ -1,5 +1,6 @@
 package detection;
 
+import org.python.netty.util.internal.ConcurrentSet;
 import server.TracerConf;
 import utils.FileIO;
 import utils.ObjPersistent;
@@ -9,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +32,15 @@ public class WindowManager {
 
     //public for test
     public Map<Long, Map<String, AnalysisContainer>> slidingWindow;
+
+    public Map<String, Map<Long, Map<String, AnalysisContainer>>> appSlidingWindow;
+
+    private Map<String, Integer> appWindowSizeMap;
+
+    private String groupByMethod = conf.getStringOrDefault("tracer.window.group-by", "time");
+    private boolean groupByTime;
+
+    private ConcurrentSet<String> appsInFinishState = new ConcurrentSet<>();
 
     private int windowSize;
     private int windowInterval;
@@ -62,19 +73,32 @@ public class WindowManager {
         public void run() {
             //System.out.printf("self checking thread started.");
             while(isChecking) {
-                //System.out.printf("idle count: %d\n", idleCount.get());
-                if((mode.equals("detection") && !hasMoreData() || mode.equals("storage")) &&
-                        idleCount.get() < 3) {
-                    idleCount.incrementAndGet();
-                }
-                if (idleCount.get() >= 3 && !firstData) {
-                    maybeStoreWindow();
-                    firstData = true;
-                }
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (groupByTime) {
+                    //System.out.printf("idle count: %d\n", idleCount.get());
+                    if ((mode.equals("detection") && !hasMoreData() || mode.equals("storage")) &&
+                            idleCount.get() < 3) {
+                        idleCount.incrementAndGet();
+                    }
+                    if (idleCount.get() >= 3 && !firstData) {
+                        maybeStoreWindow();
+                        firstData = true;
+                    }
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    if (mode.equals("storage")) {
+                        if (!appsInFinishState.isEmpty()) {
+                            maybeStoreAppAsJson();
+                        }
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
         }
@@ -97,6 +121,11 @@ public class WindowManager {
     private WindowManager() {
         windowSize = conf.getIntegerOrDefault("tracer.window.size", 1000);
         windowInterval = conf.getIntegerOrDefault("tracer.window.interval", windowSize);
+        if (groupByMethod.toLowerCase().equals("app")) {
+            groupByTime = false;
+        } else {
+            groupByTime = true;
+        }
         if (!isMSResolution && windowSize < 1000) {
             windowInterval = 1000;
             windowSize = 1000;
@@ -104,7 +133,12 @@ public class WindowManager {
         if (windowInterval > windowSize) {
             windowInterval = windowSize;
         }
-        slidingWindow = new ConcurrentSkipListMap<>();
+        if (groupByTime) {
+            slidingWindow = new ConcurrentSkipListMap<>();
+        } else {
+            appSlidingWindow = new ConcurrentSkipListMap<>();
+            appWindowSizeMap = new ConcurrentHashMap<>();
+        }
 
         selfCheckingThread.start();
         if (mode.equals("training")) {
@@ -123,43 +157,68 @@ public class WindowManager {
      * @return
      */
     public AnalysisContainer getContainerToAssign(Long timestamp, String containerId) {
-
-        if (timestamp.toString().length() > 10) {
-            timestamp /= windowSize;
-            timestamp *= windowSize;
-        }
-
-        if (firstData && !hasMoreData()) {
-            synchronized (this.firstData) {
-                currentStartTimestamp = timestamp;
-                firstData = false;
+        if (groupByTime) {
+            if (timestamp.toString().length() > 10) {
+                timestamp /= windowSize;
+                timestamp *= windowSize;
             }
-        }
-        selfCheckingRunnable.resetCount();
 
-        // TEST
-        // System.out.printf("updating container: %s, time: %d\n", containerId, timestamp);
+            if (firstData && !hasMoreData()) {
+                synchronized (this.firstData) {
+                    currentStartTimestamp = timestamp;
+                    firstData = false;
+                }
+            }
+            selfCheckingRunnable.resetCount();
 
-        // If the incoming data is out of date, we do not create it in the sliding window.
-        if (timestamp < currentStartTimestamp) {
-            return null;
-        }
+            // TEST
+            // System.out.printf("updating container: %s, time: %d\n", containerId, timestamp);
 
-        Map<String, AnalysisContainer> timestampMap = slidingWindow.get(timestamp);
-        if (timestampMap == null) {
-            timestampMap = new HashMap<>();
-            slidingWindow.put(timestamp, timestampMap);
-        }
-        assert (timestampMap != null);
-        AnalysisContainer container = timestampMap.get(containerId);
-        if (container == null) {
-            container = new AnalysisContainer();
-            container.setTimestamp(timestamp);
-            container.setContainerId(containerId);
-            timestampMap.put(containerId, container);
-        }
+            // If the incoming data is out of date, we do not create it in the sliding window.
+            if (timestamp < currentStartTimestamp) {
+                return null;
+            }
 
-        return container;
+            Map<String, AnalysisContainer> timestampMap = slidingWindow.get(timestamp);
+            if (timestampMap == null) {
+                timestampMap = new HashMap<>();
+                slidingWindow.put(timestamp, timestampMap);
+            }
+            assert (timestampMap != null);
+            AnalysisContainer container = timestampMap.get(containerId);
+            if (container == null) {
+                container = new AnalysisContainer();
+                container.setTimestamp(timestamp);
+                container.setContainerId(containerId);
+                timestampMap.put(containerId, container);
+            }
+
+            return container;
+        } else {
+            String appId;
+            if (containerId.matches("app.*")) {
+                appId = containerId;
+            } else {
+                appId = containerToAppId(containerId);
+            }
+            if (!appId.matches("app.*")) {
+                System.out.printf("invalid app id. original container id: %s\n", containerId);
+            }
+            Map<Long, Map<String, AnalysisContainer>> appMap = appSlidingWindow.get(appId);
+            if (appMap == null) {
+                appMap = new HashMap<>();
+                appSlidingWindow.put(appId, appMap);
+            }
+            assert (appMap != null);
+            Map<String, AnalysisContainer> containerMap = appMap.get(timestamp);
+            if (containerMap == null) {
+                containerMap = new HashMap<>();
+                containerMap.put(containerId, new AnalysisContainer());
+                appMap.put(timestamp, containerMap);
+            }
+            AnalysisContainer container = containerMap.get(containerId);
+            return container;
+        }
     }
 
 
@@ -209,6 +268,13 @@ public class WindowManager {
         return dataForAnalysis;
     }
 
+    public void registerFinishedApp(String appId) {
+        synchronized (this.appsInFinishState) {
+            appsInFinishState.add(appId);
+            appWindowSizeMap.put(appId, appSlidingWindow.get(appId).size());
+        }
+    }
+
     /**
      * this should be called by other class
      */
@@ -245,6 +311,45 @@ public class WindowManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void maybeStoreAppAsJson() {
+        Set<String> appToStore = new HashSet<>();
+        for (Map.Entry<String, Integer> entry: appWindowSizeMap.entrySet()) {
+            String appId = entry.getKey();
+            if (entry.getValue() == appSlidingWindow.get(appId).size()) {
+                System.out.printf("new app to store: %s\n", appId);
+                appToStore.add(appId);
+            }
+        }
+        for (String appToRemove: appToStore) {
+            appsInFinishState.remove(appToRemove);
+            appWindowSizeMap.remove(appToRemove);
+        }
+        Map<Long, Map<String, AnalysisContainer>> oneAppWindow;
+        if (mapper == null) {
+            GsonBuilder builder = new GsonBuilder();
+            mapper = builder.create();
+        }
+        for (String appId: appToStore) {
+            oneAppWindow = new HashMap<>(appSlidingWindow.get(appId));
+            String resultJson = mapper.toJson(oneAppWindow);
+            String fullPath = storagePath + "/" + appId + ".json";
+            try {
+                FileIO.write(fullPath, resultJson);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private String containerToAppId(String containerId) {
+        String res = null;
+        if (containerId.matches("container.*")) {
+            String[] parts = containerId.split("_");
+            res = "application" + "_" + parts[1] + "_" + parts[2];
+        }
+        return res;
     }
 
     public void loadSlidingWindow() {
