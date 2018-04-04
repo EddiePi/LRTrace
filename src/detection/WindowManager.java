@@ -138,8 +138,8 @@ public class WindowManager {
             slidingWindow = new ConcurrentSkipListMap<>();
         } else {
             appSlidingWindow = new ConcurrentSkipListMap<>();
-            appWindowSizeMap = new ConcurrentHashMap<>();
         }
+        appWindowSizeMap = new ConcurrentHashMap<>();
 
         selfCheckingThread.start();
         if (mode.equals("training")) {
